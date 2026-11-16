@@ -10,7 +10,7 @@
 - No instales nada que no esté en esta lista. No cambies la configuración del usuario fuera de esto.
 - Pregunta solo lo del paso 0. Todo lo demás hazlo sin preguntar, salvo donde un paso diga que necesitas el "sí" del usuario.
 
-## Paso 0: dos preguntas antes de empezar
+## Paso 0: preguntas antes de empezar
 
 Hazlas juntas, en un solo mensaje. Si el usuario ya contestó alguna en su mensaje, no la repitas.
 
@@ -18,11 +18,15 @@ Hazlas juntas, en un solo mensaje. Si el usuario ya contestó alguna en su mensa
 
 | Perfil | Pasos que corres |
 |---|---|
-| **Completo (recomendado)** | 1, 2, 2b, 3, 4, 5b (solo si dijo que sí a RTK), 6 y 7 |
+| **Completo (recomendado)** | 1, 2, 2b, 3, 4, 5b (solo si dijo que sí a RTK), 5c, 5d (solo si dijo que sí), 6 y 7 |
 | **Completo + ECC** | los de Completo más el paso 5. Avísale en una línea que ECC agrega 314 skills, 71 agentes y 27 hooks que se activan en cada acción, y que se encima con Superpowers |
-| **Solo cerebro** | 1, 6 y 7 |
+| **Solo cerebro** | 1, 5c, 6 y 7 |
 
 **2. ¿Instalo RTK?** Es un programa de terceros (github.com/rtk-ai/rtk, código abierto) que comprime la salida de los comandos para gastar menos tokens. Se instala con un script que se descarga de internet y se ejecuta en su máquina, así que **necesitas su "sí" explícito**. Si no contesta o dice que no, sáltate el paso 5b.
+
+**3. ¿Modo ligero?** (recomendado) Apaga casi todos los plugins para que no ocupen contexto en cada mensaje (medido: de ~10,700 a ~700 tokens fijos) y deja que la araña, un programa local sin IA, le pase a Claude solo las skills que encajan con cada mensaje. Contras que debes decirle: la araña elige por palabras y a veces no atina; y los plugins apagados pierden sus agentes y servidores MCP hasta que se prenden en un proyecto. Se revierte con un comando.
+
+**4. ¿Copias locales de documentación?** Si quiere tener la documentación (Solana, Jupiter, Cloudflare, Roblox, Godot…) descargada para consultarla sin internet. Si dice que sí, en el paso 5d le preguntas en qué unidad.
 
 ## Paso 1: plugins propios (marketplace `cerebro`)
 
@@ -32,7 +36,7 @@ claude plugin marketplace add eddyorlandotp/claude-cerebro
 
 Instala cada uno con `claude plugin install <nombre>@cerebro`:
 
-cerebro-guardia, cerebro-base, cerebro-solana, cerebro-cripto, cerebro-web, cerebro-codigo, cerebro-ia, cerebro-apps, cerebro-juegos, cerebro-diseno, cerebro-linux, cerebro-casa, cerebro-negocio, cerebro-vida
+cerebro-guardia, cerebro-panel, cerebro-base, cerebro-solana, cerebro-cripto, cerebro-web, cerebro-codigo, cerebro-ia, cerebro-apps, cerebro-juegos, cerebro-diseno, cerebro-linux, cerebro-casa, cerebro-negocio, cerebro-vida
 
 ## Paso 2: oficiales de Anthropic (marketplace `claude-plugins-official`)
 
@@ -135,6 +139,26 @@ claude plugin install ecc@ecc
 
 **ccusage** no se instala: se usa cuando haga falta con `npx ccusage@latest daily`.
 
+## Paso 5c: la araña y el modo ligero
+
+`cerebro-panel` trae la araña (`arana`) y el panel Telaraña. En esta misma sesión el plugin aún no está cargado, así que llama a la araña por su ruta:
+
+```bash
+ARANA="$(claude plugin list --json | python3 -c "import json,sys; print(next(x['installPath'] for x in json.load(sys.stdin) if x['id'].startswith('cerebro-panel@')))")/arana/bin/arana.mjs"
+node "$ARANA" indice | tail -3
+node "$ARANA" modo estado
+```
+
+- Si el usuario dijo **sí al modo ligero**: corre `node "$ARANA" modo ligero` y luego `node "$ARANA" modo estado`; reporta los tokens fijos de antes y después. Hazlo **al final**, cuando ya esté instalado todo lo demás.
+- Si dijo que no, déjalo en modo completo. Puede cambiar cuando quiera con `arana modo ligero` o `arana modo completo`.
+- Si `node` no existe o es menor a la versión 20, no hay araña ni panel: dilo y sigue (lo demás funciona igual).
+
+## Paso 5d: copias locales de documentación (solo si dijo que sí)
+
+1. `node "$ARANA" espejo ruta`. Si no hay carpeta configurada, el comando lista las unidades montadas con su espacio libre: **muéstrale la lista al usuario y pregúntale en cuál** (y en qué carpeta) guardarlas. No elijas tú.
+2. `node "$ARANA" espejo listar` para ver las sugeridas con su tamaño; pregúntale cuáles quiere (por defecto, las de sus proyectos: solana, jupiter, helius, jito, phantom, cloudflare, rojo, luau, roblox, hyprland).
+3. Configura la carpeta y descarga las elegidas siguiendo la skill `espejos` del plugin (léela en `$(dirname "$ARANA")/../../skills/espejos/SKILL.md`). Reporta el espacio que ocuparon.
+
 ## Paso 6: dependencias del sistema
 
 El usuario usa CachyOS (Arch). Revisa qué falta con `command -v` para: `typescript-language-server`, `pyright`, `node`, `npm`, `ffmpeg`, `git`. Si falta alguno, **no lo instales tú** (requiere sudo): dale al usuario el comando exacto para pegar, por ejemplo:
@@ -150,7 +174,13 @@ sudo pacman -S --needed typescript-language-server pyright nodejs npm ffmpeg git
    - cuántos plugins quedaron instalados (cuántos prendidos y cuántos apagados) y cuáles fallaron (con el error corto);
    - el comando de dependencias del paso 6, si faltó algo;
    - que escriba **`/reload-plugins`** (o reinicie Claude Code) para activarlos, y `/mcp` para ver los servidores MCP;
-   - una línea: en cada proyecto puede correr `/cerebro-base:dieta-de-contexto` para apagar ahí los plugins que no use y ahorrar contexto.
+   - en qué modo quedó (ligero o completo) y los tokens fijos por mensaje;
+   - que para ver el panel escriba `/cerebro-panel:abrir-panel` después de reiniciar;
+   - una línea: en cada proyecto puede correr `/cerebro-base:dieta-de-contexto` para prender ahí solo lo que ese proyecto usa.
+
+## Después de reiniciar: probar Telaraña en esta máquina
+
+Si el usuario te pide "prueba el panel" o "sigue con la parte 2": lee `~/claude-cerebro/plugins/cerebro-panel/docs/PROMPT-LOCAL.md` completo y síguelo.
 
 ## Para actualizar más adelante
 

@@ -1,0 +1,14 @@
+{
+  "name": "cerebro-panel",
+  "description": "Panel local sin IA para ver a Claude Code trabajar: cara que piensa, araña que recomienda skills y teje el hilo de la sesión, flujo por bloques y medidor de contexto. Corre en tu compu, cero tokens extra.",
+  "version": "0.1.0",
+  "author": {
+    "name": "eddyorlandotp"
+  },
+  "license": "MIT",
+  "keywords": [
+    "panel",
+    "monitor",
+    "hooks"
+  ]
+}

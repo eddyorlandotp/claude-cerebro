@@ -1,0 +1,199 @@
+/* ==========================================================================
+   Telaraña · base: fuentes locales, tokens, rejilla general y barra superior.
+   Reglas duras de DISENO.md: tres colores con significado (cian, rosa, ámbar),
+   radio 0 en paneles, sin degradados, sin sombras, sin blur. Solo se animan
+   transform y opacity (la única excepción es grid-template al minimizar).
+   ========================================================================== */
+
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 600; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans Condensed"; font-weight: 400; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-sans-condensed-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans Condensed"; font-weight: 500; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-sans-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans Condensed"; font-weight: 600; font-style: normal; font-display: block;
+  src: url("../fuentes/ibm-plex-sans-condensed-latin-600-normal.woff2") format("woff2"); }
+
+:root {
+  --fondo: #06090b;
+  --fondo-2: #0b1013;
+  --linea: #18222a;
+  --linea-2: #263540;
+  --tinta: #dfe8ea;
+  --tinta-2: #8a9aa1;
+  --tinta-3: #4d5c64;
+  --cian: #86d5ea;
+  --cian-tenue: #2f5d6b;
+  --rosa: #ff4f72;
+  --ambar: #f0b54a;
+  --cara: #e9f0ef;
+
+  --mono: "IBM Plex Mono", ui-monospace, "DejaVu Sans Mono", monospace;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+
+  /* Escala fluida: todo el texto cuelga de esta base (rem). */
+  --base: clamp(11px, 0.62vw + 4px, 15px);
+  --lado: 24px;            /* padding horizontal de zona: misma vertical para Biblioteca, Flujo y barra */
+  --alto: 16px;            /* padding vertical de zona */
+  --barra: 36px;
+
+  --sale: cubic-bezier(0.23, 1, 0.32, 1);
+  --va-y-viene: cubic-bezier(0.77, 0, 0.175, 1);
+}
+/* En vertical el ancho es poco y vw se queda corto: la base se liga un poco más fuerte al ancho. */
+@media (orientation: portrait) { :root { --base: clamp(11px, 0.9vw + 2px, 15px); } }
+@media (max-width: 1280px)   { :root { --lado: 16px; --alto: 12px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { font-size: var(--base); }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--mono);
+  font-size: 1rem;
+  line-height: 1.45;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+  user-select: none;
+}
+h2, p, ol, ul { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+code { font-family: var(--mono); color: var(--tinta); }
+
+#lienzo { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+
+/* ---------- Rejilla general ------------------------------------------------
+   distribucion.js escribe grid-template-columns/rows en px según orientación y
+   zonas minimizadas. Aquí solo se dice en qué celda vive cada zona. */
+.panel {
+  position: fixed; inset: 0;
+  display: grid;
+  transition: grid-template-columns 220ms var(--va-y-viene), grid-template-rows 220ms var(--va-y-viene);
+}
+.panel.sin-animar, .panel.sin-animar * { transition: none !important; }
+.panel > .zona, .panel > .barra { transition: opacity 600ms linear; }
+.panel.dormida > .zona, .panel.dormida > .barra { opacity: 0.6; }
+
+/* Fila 2 = banda de conexión perdida (0 px cuando hay conexión). */
+.panel > .aviso { grid-column: 1 / -1; grid-row: 2; }
+
+/* Horizontal: columnas [biblioteca][pensamiento][derecha]; filas [barra][aviso][contexto][hilo][actividad][flujo] */
+.panel.horizontal > .barra          { grid-column: 1 / -1; grid-row: 1; }
+.panel.horizontal > #z-biblioteca   { grid-column: 1; grid-row: 3 / 6; border-right: 1px solid var(--linea); }
+.panel.horizontal > #z-pensamiento  { grid-column: 2; grid-row: 3 / 6; }
+.panel.horizontal > #z-contexto     { grid-column: 3; grid-row: 3; border-left: 1px solid var(--linea); }
+.panel.horizontal > #z-hilo         { grid-column: 3; grid-row: 4; border-left: 1px solid var(--linea); border-top: 1px solid var(--linea); }
+.panel.horizontal > #z-actividad    { grid-column: 3; grid-row: 5; border-left: 1px solid var(--linea); border-top: 1px solid var(--linea); }
+.panel.horizontal > #z-flujo        { grid-column: 1 / -1; grid-row: 6; border-top: 1px solid var(--linea); }
+
+/* Vertical: columnas [mitad][mitad]; filas [barra][aviso][pensamiento][biblioteca][flujo][contexto|hilo][actividad] */
+.panel.vertical > .barra            { grid-column: 1 / -1; grid-row: 1; }
+.panel.vertical > #z-pensamiento    { grid-column: 1 / -1; grid-row: 3; }
+.panel.vertical > #z-biblioteca     { grid-column: 1 / -1; grid-row: 4; border-top: 1px solid var(--linea); }
+.panel.vertical > #z-flujo          { grid-column: 1 / -1; grid-row: 5; border-top: 1px solid var(--linea); }
+.panel.vertical > #z-contexto       { grid-column: 1; grid-row: 6; border-top: 1px solid var(--linea); }
+.panel.vertical > #z-hilo           { grid-column: 2; grid-row: 6; border-top: 1px solid var(--linea); border-left: 1px solid var(--linea); }
+.panel.vertical > #z-actividad      { grid-column: 1 / -1; grid-row: 7; border-top: 1px solid var(--linea); }
+
+/* ---------- Zona ------------------------------------------------------------
+   La zona es la celda (sin padding, para poder plegarse a 0 px); el contenido
+   va en .zona-int, que es quien lleva el padding. */
+.zona { position: relative; overflow: hidden; min-width: 0; min-height: 0; }
+.zona-int {
+  position: absolute; inset: 0;
+  padding: var(--alto) var(--lado);
+  display: flex; flex-direction: column;
+  transition: opacity 160ms linear;
+}
+.zona.plegada { border-color: transparent !important; pointer-events: none; }
+.zona.plegada .zona-int { opacity: 0; }
+
+.zona-cab { display: flex; align-items: baseline; gap: 12px; height: 20px; flex: none; position: relative; z-index: 2; }
+.rotulo {
+  font-family: var(--cond); font-weight: 600; font-size: 0.85rem; line-height: 20px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-2);
+}
+.zona-meta { font-size: 0.8rem; color: var(--tinta-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.zona-meta b { font-weight: 500; color: var(--tinta-2); }
+
+/* Botón minimizar: raya de 1.5 px; zona de clic de 28 px aunque el dibujo sea chico. */
+.zona-min {
+  margin-left: auto; align-self: center; flex: none;
+  width: 20px; height: 20px; position: relative; color: var(--tinta-3);
+  transition: transform 140ms var(--sale), color 140ms linear;
+}
+.zona-min::before { content: ""; position: absolute; inset: -6px; }
+.zona-min::after { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 0; border-top: 1.5px solid currentColor; }
+.zona-min:active { transform: scale(0.94); }
+.zona-min:focus-visible, .pestana:focus-visible { outline: 1px solid var(--cian); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .zona-min:hover { color: var(--tinta); } }
+
+.vacio { margin-top: 24px; color: var(--tinta-2); max-width: 44ch; position: relative; z-index: 2; }
+
+/* ---------- Barra superior --------------------------------------------------- */
+.barra {
+  display: flex; align-items: center; gap: 0;
+  height: var(--barra); padding: 0 var(--lado);
+  border-bottom: 1px solid var(--linea);
+  font-size: 0.85rem; white-space: nowrap; min-width: 0;
+  position: relative; z-index: 3;
+}
+.barra-marca {
+  font-family: var(--cond); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--tinta); margin-right: 20px;
+}
+.barra-dato { color: var(--tinta-2); padding: 0 12px; border-left: 1px solid var(--linea); line-height: 14px; }
+.barra-dato:empty { display: none; }
+.barra-dato b { font-weight: 500; color: var(--tinta); }
+.barra-dato .ico { width: 12px; height: 12px; vertical-align: -1.5px; margin-right: 6px; color: var(--tinta-3); }
+.barra-crono { color: var(--tinta); min-width: 7ch; }
+.barra-hueco { flex: 1; }
+.barra-estado { display: inline-flex; align-items: center; gap: 8px; color: var(--tinta); padding: 0 16px; }
+.barra-estado .punto { width: 6px; height: 6px; background: var(--cian); flex: none; }
+.barra-estado[data-tono="ambar"] .punto { background: var(--ambar); }
+.barra-estado[data-tono="rosa"] .punto { background: var(--rosa); }
+.barra-estado[data-tono="apagado"] .punto { background: var(--tinta-3); }
+.barra-estado[data-tono="ambar"] { color: var(--ambar); }
+.barra-estado[data-tono="rosa"] { color: var(--rosa); }
+.barra-hora { color: var(--tinta-2); padding-left: 16px; border-left: 1px solid var(--linea); line-height: 14px; }
+
+/* Pestañas de zonas minimizadas (estilo pestaña de navegador, sin curvas). */
+.barra-pestanas { display: flex; align-items: stretch; align-self: stretch; margin-left: 12px; gap: 4px; padding-top: 7px; }
+.pestana {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 12px; margin-bottom: -1px;
+  background: var(--fondo-2);
+  border: 1px solid var(--linea-2); border-bottom-color: var(--fondo-2);
+  font-family: var(--cond); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--tinta-2);
+  transition: transform 140ms var(--sale), color 140ms linear;
+}
+.pestana:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) { .pestana:hover { color: var(--tinta); } }
+.pestana .tecla { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0; color: var(--tinta-3); }
+.pestana .punto { width: 5px; height: 5px; background: var(--tinta-3); opacity: 0.6; }
+.pestana[data-aviso="cian"] .punto { background: var(--cian); opacity: 1; animation: late 900ms steps(2, jump-none) 3; }
+.pestana[data-aviso="rosa"] .punto { background: var(--rosa); opacity: 1; animation: late 900ms steps(2, jump-none) infinite; }
+@keyframes late { 0% { opacity: 1; } 100% { opacity: 0.15; } }
+
+/* Banda de conexión perdida: una línea bajo la barra (fila propia de la rejilla). */
+.aviso {
+  overflow: hidden; min-height: 0;
+  line-height: 24px; padding: 0 var(--lado);
+  background: var(--rosa); color: var(--fondo);
+  font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+  .pestana .punto { animation: none !important; }
+}

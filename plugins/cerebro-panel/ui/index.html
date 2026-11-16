@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telaraña</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/zonas.css">
+</head>
+<body>
+<!-- Un solo lienzo debajo de todo: nube de puntos, arañas, hilos, paquetes, caras y conectores del flujo. -->
+<canvas id="lienzo" aria-hidden="true"></canvas>
+
+<div id="panel" class="panel">
+
+  <header id="barra" class="barra">
+    <span class="barra-marca">Telaraña</span>
+    <span class="barra-dato" id="b-proyecto" title="Proyecto"></span>
+    <span class="barra-dato" id="b-rama" title="Rama"></span>
+    <span class="barra-dato" id="b-modelo" title="Modelo"></span>
+    <span class="barra-dato" id="b-turno"></span>
+    <span class="barra-dato barra-crono" id="b-crono"></span>
+    <nav class="barra-pestanas" id="b-pestanas" aria-label="Zonas minimizadas"></nav>
+    <span class="barra-hueco"></span>
+    <span class="barra-estado" id="b-estado"><i class="punto"></i><span id="b-estado-txt">dormida</span></span>
+    <span class="barra-hora" id="b-hora"></span>
+  </header>
+
+  <div class="aviso" id="aviso" role="status">Se perdió la conexión con el panel. Reintentando…</div>
+
+  <section class="zona" id="z-biblioteca" data-zona="biblioteca" aria-label="Biblioteca">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Biblioteca</h2>
+        <span class="zona-meta" id="bib-meta"></span>
+        <button class="zona-min" data-min="biblioteca" aria-label="Minimizar Biblioteca" title="Minimizar (1)"></button>
+      </div>
+      <p class="vacio" id="bib-vacio" hidden>No encontré skills instaladas. Corre <code>/cerebro-base:actualizar-cerebro</code>.</p>
+    </div>
+  </section>
+
+  <section class="zona" id="z-pensamiento" data-zona="pensamiento" aria-label="Pensamiento">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Pensamiento</h2>
+        <span class="zona-meta" id="pen-meta"></span>
+      </div>
+      <div class="burbujas" id="burbujas" aria-live="polite"></div>
+      <div class="pie" id="pie">
+        <div class="pie-estado" id="pie-estado">
+          <span class="monito" id="monito"></span>
+          <span class="pie-verbo" id="pie-verbo"></span>
+          <span class="pie-objeto" id="pie-objeto"></span>
+        </div>
+        <p class="pie-vacio" id="pie-vacio" hidden>Sin sesión activa. Abre Claude Code en cualquier proyecto y aquí aparece.</p>
+        <div class="fichas" id="fichas" aria-label="Skills sugeridas"></div>
+        <div class="subagentes" id="subagentes" aria-label="Subagentes"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zona" id="z-contexto" data-zona="contexto" aria-label="Contexto">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Contexto</h2>
+        <span class="zona-meta" id="ctx-meta"></span>
+        <button class="zona-min" data-min="contexto" aria-label="Minimizar Contexto" title="Minimizar (3)"></button>
+      </div>
+      <div class="ctx" id="ctx"></div>
+    </div>
+  </section>
+
+  <section class="zona" id="z-hilo" data-zona="hilo" aria-label="Hilo">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Hilo</h2>
+        <span class="zona-meta" id="hilo-meta"></span>
+        <button class="zona-min" data-min="hilo" aria-label="Minimizar Hilo" title="Minimizar (4)"></button>
+      </div>
+      <div class="hilo" id="hilo">
+        <div class="hilo-texto" id="hilo-texto"></div>
+        <div class="hilo-tela" id="hilo-tela"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zona" id="z-actividad" data-zona="actividad" aria-label="Actividad">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Actividad</h2>
+        <span class="zona-meta" id="act-meta"></span>
+        <button class="zona-min" data-min="actividad" aria-label="Minimizar Actividad" title="Minimizar (5)"></button>
+      </div>
+      <ol class="registro" id="registro"></ol>
+    </div>
+  </section>
+
+  <section class="zona" id="z-flujo" data-zona="flujo" aria-label="Flujo">
+    <div class="zona-int">
+      <div class="zona-cab">
+        <h2 class="rotulo">Flujo</h2>
+        <span class="zona-meta" id="flujo-meta"></span>
+        <span class="flujo-previos" id="flujo-previos"></span>
+        <button class="zona-min" data-min="flujo" aria-label="Minimizar Flujo" title="Minimizar (2)"></button>
+      </div>
+      <div class="flujo" id="flujo"></div>
+    </div>
+  </section>
+
+</div>
+<script type="module" src="js/principal.js"></script>
+</body>
+</html>

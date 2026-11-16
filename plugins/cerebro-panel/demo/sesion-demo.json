@@ -1,0 +1,1134 @@
+{
+ "biblioteca": {
+  "tipo": "biblioteca",
+  "plugins": [
+   {
+    "nombre": "cerebro-apps",
+    "activo": false,
+    "skills": [
+     {
+      "id": "cerebro-apps:apps-escritorio-tauri",
+      "nombre": "apps-escritorio-tauri",
+      "desc": "Decidir si hace falta app de escritorio y hacerla con Tauri 2 (o Electron) desde Linux - AppImage/deb/rpm y Windows, glibc en CachyOS, firma"
+     },
+     {
+      "id": "cerebro-apps:apps-moviles-expo",
+      "nombre": "apps-moviles-expo",
+      "desc": "Flujo de app móvil con Expo desde Linux sin Mac y con iPhone - Expo Go vs development build, compilar iOS en la nube (EAS), probar en iPhone"
+     },
+     {
+      "id": "cerebro-apps:bots-de-discord",
+      "nombre": "bots-de-discord",
+      "desc": "Bot de Discord que no se cae ni lo banean - discord.js o discord.py, intents mínimos, slash commands, responder en 3 s, sin Administrator, r"
+     },
+     {
+      "id": "cerebro-apps:extensiones-chrome",
+      "nombre": "extensiones-chrome",
+      "desc": "Extensiones de Chrome Manifest V3 - service worker que se apaga, content scripts, permisos mínimos, storage, sin código remoto y revisión en"
+     },
+     {
+      "id": "cerebro-apps:publicar-en-tiendas",
+      "nombre": "publicar-en-tiendas",
+      "desc": "Publicar en App Store y Google Play desde México - cuentas y cuotas, prueba cerrada obligatoria en Play, políticas que rechazan (cripto, pag"
+     },
+     {
+      "id": "cerebro-apps:pwa",
+      "nombre": "pwa",
+      "desc": "Decidir si una PWA basta en vez de app nativa y hacerla bien - manifest, service worker, instalar en iPhone y Android, push web en iOS, offl"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-base",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-base:actualizar-cerebro",
+      "nombre": "actualizar-cerebro",
+      "desc": "Actualiza claude-cerebro y todos los plugins curados, e instala los que se hayan agregado al repo. Úsala cuando el usuario diga \"actualiza e"
+     },
+     {
+      "id": "cerebro-base:ahorrar-tokens",
+      "nombre": "ahorrar-tokens",
+      "desc": "Trabajar gastando menos tokens sin bajar la calidad - leer solo lo necesario, filtrar salidas largas, delegar lo ruidoso a subagentes y sabe"
+     },
+     {
+      "id": "cerebro-base:arrancar-proyecto",
+      "nombre": "arrancar-proyecto",
+      "desc": "Arranca o adopta un proyecto con base sólida - CLAUDE.md breve, git init, .gitignore correcto, .env.example, README corto y comandos de dev/"
+     },
+     {
+      "id": "cerebro-base:cierre-de-sesion",
+      "nombre": "cierre-de-sesion",
+      "desc": "Cierra una sesión de trabajo sin perder nada - guarda estado en Obsidian o NOTAS.md, prioriza pendientes, deja comandos para retomar y hace "
+     },
+     {
+      "id": "cerebro-base:deploy-y-monitoreo",
+      "nombre": "deploy-y-monitoreo",
+      "desc": "Publicar sin romper producción - checklist (build, tests, secrets, migraciones, rollback), smoke test real, logs y monitoreo gratis con aler"
+     },
+     {
+      "id": "cerebro-base:dieta-de-contexto",
+      "nombre": "dieta-de-contexto",
+      "desc": "Audita cuánto contexto gastan los plugins, MCP y CLAUDE.md en este proyecto, apaga aquí lo que no se usa y prende lo que sí hace falta, sin "
+     },
+     {
+      "id": "cerebro-base:investigar-antes-de-codear",
+      "nombre": "investigar-antes-de-codear",
+      "desc": "Antes de codear contra una API, SDK, librería o CLI externa - revisa la versión instalada, lee la doc actual (Context7 o doc oficial), no in"
+     },
+     {
+      "id": "cerebro-base:memoria-obsidian",
+      "nombre": "memoria-obsidian",
+      "desc": "Usa una bóveda de Obsidian como memoria entre sesiones (estado, decisiones, pendientes, bitácora por proyecto). Usar cuando digan \"abre Obsi"
+     },
+     {
+      "id": "cerebro-base:modo-mentor",
+      "nombre": "modo-mentor",
+      "desc": "Trabaja con un usuario que no sabe programar. Explica en palabras simples antes de cambios grandes, pide confirmación antes de acciones irre"
+     },
+     {
+      "id": "cerebro-base:red-de-seguridad-git",
+      "nombre": "red-de-seguridad-git",
+      "desc": "Git como red de seguridad - commits pequeños con mensajes claros, rama antes de cambios riesgosos, cómo deshacer (revert, reset, reflog), ta"
+     },
+     {
+      "id": "cerebro-base:secretos-y-llaves",
+      "nombre": "secretos-y-llaves",
+      "desc": "Manejo seguro de API keys, tokens, .env, secrets de Cloudflare/CI y llaves privadas de Solana (id.json, keypairs de 64 números). Qué hacer s"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-casa",
+    "activo": false,
+    "skills": [
+     {
+      "id": "cerebro-casa:esphome-y-sensores",
+      "nombre": "esphome-y-sensores",
+      "desc": "Sensores y relevadores caseros con ESP32 y ESPHome - YAML, flashear desde Linux (puerto serial en Arch, grupo uucp), OTA, integrar a Home As"
+     },
+     {
+      "id": "cerebro-casa:home-assistant",
+      "nombre": "home-assistant",
+      "desc": "Home Assistant en casa - instalar (HA OS vs Docker), Tuya/Smart Life/Steren (nube vs local), automatizaciones, editar configuración sin romp"
+     },
+     {
+      "id": "cerebro-casa:servidor-multimedia",
+      "nombre": "servidor-multimedia",
+      "desc": "Netflix casero con Jellyfin - instalar en la mini-PC, transcodificación por hardware (Intel QSV, NVIDIA NVENC), carpetas y nombres, apps de "
+     },
+     {
+      "id": "cerebro-casa:wifi-y-red-domestica",
+      "nombre": "wifi-y-red-domestica",
+      "desc": "Wi-Fi de la casa - routers extra en modo AP vs router (doble NAT), mesh, bandas y canales 2.4/5/6 GHz, Wi-Fi 7 MLO, ubicación, red para IoT,"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-codigo",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-codigo:apis-y-webhooks",
+      "nombre": "apis-y-webhooks",
+      "desc": "Diseñar y consumir APIs - REST, validación, códigos de estado, paginación, auth (API key, sesión, JWT), CORS, rate limit, webhooks entrantes"
+     },
+     {
+      "id": "cerebro-codigo:codigo-heredado-y-refactors",
+      "nombre": "codigo-heredado-y-refactors",
+      "desc": "Cambiar un repo desconocido o viejo sin romperlo - mapa rápido y puntos de entrada, tests de caracterización, refactor en pasos chicos, no r"
+     },
+     {
+      "id": "cerebro-codigo:depurar-rendimiento",
+      "nombre": "depurar-rendimiento",
+      "desc": "Encontrar por qué algo es lento o gasta memoria midiendo antes de optimizar - profilers de Node, Python y navegador, N+1, fugas, latencia de"
+     },
+     {
+      "id": "cerebro-codigo:docker-y-github-actions",
+      "nombre": "docker-y-github-actions",
+      "desc": "Dockerfile multi-stage mínimo (Node/pnpm, Python/uv), .dockerignore, compose para desarrollo, CI en GitHub Actions (lint+test), deploy con s"
+     },
+     {
+      "id": "cerebro-codigo:python-moderno-uv",
+      "nombre": "python-moderno-uv",
+      "desc": "Python moderno con uv - proyectos, dependencias y venv, pyproject.toml, ruff, tipado, pytest y scripts con dependencias inline (PEP 723); nu"
+     },
+     {
+      "id": "cerebro-codigo:react-y-nextjs",
+      "nombre": "react-y-nextjs",
+      "desc": "Arquitectura React - Vite+React vs Next.js App Router, Server vs Client Components, data fetching, Server Actions, estado, Tailwind 4, error"
+     },
+     {
+      "id": "cerebro-codigo:testing-practico",
+      "nombre": "testing-practico",
+      "desc": "Qué probar en proyectos chicos y cómo - dinero, parsers y casos borde primero, vitest y pytest, mocks mínimos, fixtures reales, smoke tests "
+     },
+     {
+      "id": "cerebro-codigo:typescript-node-moderno",
+      "nombre": "typescript-node-moderno",
+      "desc": "Proyecto TypeScript/Node moderno y simple - Node LTS, ESM, tsconfig estricto, pnpm vs npm vs bun, correr .ts directo o con tsx, validar entr"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-cripto",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-cripto:analisis-on-chain",
+      "nombre": "analisis-on-chain",
+      "desc": "Investigar datos on-chain - exploradores (Etherscan, Basescan, Blockscout, Solscan), Dune SQL y API, precios (CoinGecko, DexScreener, DefiLl"
+     },
+     {
+      "id": "cerebro-cripto:defi-conceptos",
+      "nombre": "defi-conceptos",
+      "desc": "Explicar y calcular DeFi sin errores - AMM x*y=k, liquidez concentrada, price impact vs slippage, impermanent loss, MEV y sandwich (RPC priv"
+     },
+     {
+      "id": "cerebro-cripto:evm-y-base",
+      "nombre": "evm-y-base",
+      "desc": "Código para Ethereum, Base y otras L2 EVM - cuentas, gas EIP-1559 y fee L1, nonces, ERC-20 (decimals, approve), RPCs, viem/wagmi, conectar b"
+     },
+     {
+      "id": "cerebro-cripto:seguridad-cripto-personal",
+      "nombre": "seguridad-cripto-personal",
+      "desc": "Proteger billeteras del usuario - seed offline, hardware wallet, billeteras separadas (fría, caliente, bot), revisar y revocar approvals, fi"
+     },
+     {
+      "id": "cerebro-cripto:solidity-basico-y-seguridad",
+      "nombre": "solidity-basico-y-seguridad",
+      "desc": "Antes de escribir o desplegar un contrato Solidity - si hace falta, Foundry (forge, anvil, cast), OpenZeppelin 5.x, reentrancy, oráculos, ap"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-diseno",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-diseno:blender-low-poly-roblox",
+      "nombre": "blender-low-poly-roblox",
+      "desc": "Modelar assets low-poly para Roblox con scripts de Blender sin interfaz (blender --background), revisar triángulos y medidas, colores por vé"
+     },
+     {
+      "id": "cerebro-diseno:branding-y-logos",
+      "nombre": "branding-y-logos",
+      "desc": "Definir la marca en un archivo reutilizable (nombre, tono, colores, tipografía) y hacer logos SVG revisados, con favicon, avatar redondo y b"
+     },
+     {
+      "id": "cerebro-diseno:imagenes-por-terminal",
+      "nombre": "imagenes-por-terminal",
+      "desc": "Editar imágenes por comandos con ImageMagick 7 (magick) - redimensionar, recortar, WebP/AVIF, quitar EXIF y GPS antes de publicar, sprites/a"
+     },
+     {
+      "id": "cerebro-diseno:miniaturas-y-graficos",
+      "nombre": "miniaturas-y-graficos",
+      "desc": "Miniaturas y gráficos promocionales para YouTube, Roblox y Steam a tamaño oficial, legibles en celular, en lote desde plantillas HTML/SVG a "
+     },
+     {
+      "id": "cerebro-diseno:ui-ux-basico",
+      "nombre": "ui-ux-basico",
+      "desc": "Que una app, dashboard o terminal de trading se entienda - jerarquía, estados de carga/vacío/error, densidad de números, móvil primero, cont"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-ia",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-ia:apps-con-llms",
+      "nombre": "apps-con-llms",
+      "desc": "Construir apps con LLMs (Claude u otros) - elegir modelo por costo y latencia, prompt caching, JSON con schema, streaming, topes de gasto, e"
+     },
+     {
+      "id": "cerebro-ia:automatizaciones-n8n",
+      "nombre": "automatizaciones-n8n",
+      "desc": "Automatizaciones con n8n para clientes - self-hosted en Docker vs Cloud, licencia, webhooks, credenciales, errores y respaldos, cuándo convi"
+     },
+     {
+      "id": "cerebro-ia:chatbots-whatsapp-telegram",
+      "nombre": "chatbots-whatsapp-telegram",
+      "desc": "Bots de WhatsApp (Cloud API, plantillas, ventana de 24 h, costo por mensaje) y Telegram (BotFather, webhook vs polling, alertas de trading) "
+     },
+     {
+      "id": "cerebro-ia:ml-series-de-tiempo",
+      "nombre": "ml-series-de-tiempo",
+      "desc": "Entrenar modelos de señales sobre precios y flujos (el cazador) - etiquetas sin lookahead, walk-forward con hueco, línea base, desbalance, m"
+     },
+     {
+      "id": "cerebro-ia:modelos-locales",
+      "nombre": "modelos-locales",
+      "desc": "Correr LLMs y embeddings en la PC con NVIDIA (RTX 5070, 12 GB) en Arch/CachyOS - Ollama, llama.cpp o vLLM, qué modelo y cuantización cabe en"
+     },
+     {
+      "id": "cerebro-ia:prompts-que-funcionan",
+      "nombre": "prompts-que-funcionan",
+      "desc": "Escribir instrucciones que un modelo sigue bien - system prompts de bots, briefs para subagentes y prompts para que Claude Code haga una tar"
+     },
+     {
+      "id": "cerebro-ia:rag-y-busqueda",
+      "nombre": "rag-y-busqueda",
+      "desc": "Responder con documentos propios (RAG) - cuándo meter todo al contexto, chunking, embeddings, búsqueda híbrida BM25 más vectores, rerank, SQ"
+     },
+     {
+      "id": "cerebro-ia:scraping-responsable",
+      "nombre": "scraping-responsable",
+      "desc": "Sacar datos de sitios web sin meterse en problemas - API primero, httpx con selectolax o BeautifulSoup, Playwright solo con JavaScript, robo"
+     },
+     {
+      "id": "cerebro-ia:servidores-mcp-propios",
+      "nombre": "servidores-mcp-propios",
+      "desc": "Decidir si conviene un servidor MCP propio, una skill o un script; esqueleto mínimo (Python o TypeScript), herramientas bien descritas, cred"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-juegos",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-juegos:diseno-de-juegos-y-retencion",
+      "nombre": "diseno-de-juegos-y-retencion",
+      "desc": "Diseño de juegos y retención (Roblox y Steam) - core loop, progresión, primeros 60 segundos, retención D1/D7/D30, analíticas del Creator Das"
+     },
+     {
+      "id": "cerebro-juegos:godot-indie",
+      "nombre": "godot-indie",
+      "desc": "Hacer un juego indie en Godot 4 desde Linux con Claude Code - estructura de proyecto, GDScript tipado, escenas, nodos, señales, autoloads, g"
+     },
+     {
+      "id": "cerebro-juegos:roblox-anti-exploit",
+      "nombre": "roblox-anti-exploit",
+      "desc": "Seguridad anti-trampas en Roblox - nunca confiar en el cliente, validar cada RemoteEvent en el servidor (tipos, rangos, distancia, cooldowns"
+     },
+     {
+      "id": "cerebro-juegos:roblox-datos-y-monetizacion",
+      "nombre": "roblox-datos-y-monetizacion",
+      "desc": "Datos y dinero en Roblox - DataStores con session locking (ProfileStore), reintentos, BindToClose, Game Passes vs Developer Products, Proces"
+     },
+     {
+      "id": "cerebro-juegos:roblox-en-linux-con-rojo",
+      "nombre": "roblox-en-linux-con-rojo",
+      "desc": "Flujo para hacer juegos de Roblox desde Linux con Claude Code - Roblox Studio con Vinegar, Rojo, Rokit, Wally, StyLua, Selene y luau-lsp, MC"
+     },
+     {
+      "id": "cerebro-juegos:roblox-luau-arquitectura",
+      "nombre": "roblox-luau-arquitectura",
+      "desc": "Arquitectura Roblox en Luau - servidor vs cliente, dónde va cada script, ModuleScripts y servicios, RemoteEvents vs RemoteFunctions, Luau --"
+     },
+     {
+      "id": "cerebro-juegos:steam-lanzamiento",
+      "nombre": "steam-lanzamiento",
+      "desc": "Lanzar un juego indie en Steam - Steam Direct (cuota y recuperación), página Coming Soon temprano, wishlists, cápsulas, tráiler, demo, Steam"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-linux",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-linux:cachyos-hyprland-fish",
+      "nombre": "cachyos-hyprland-fish",
+      "desc": "Reglas para operar en la PC del usuario con Ryoku (edición CachyOS, Arch), Hyprland en Lua, fish y NVIDIA. Úsala antes de instalar paquetes,"
+     },
+     {
+      "id": "cerebro-linux:homelab-y-red",
+      "nombre": "homelab-y-red",
+      "desc": "Home lab y red de casa - IP fija o reserva DHCP, abrir puertos y firewall (ufw), CGNAT y alternativas (Tailscale, Cloudflare Tunnel, playit."
+     },
+     {
+      "id": "cerebro-linux:minecraft-bedrock-servidor",
+      "nombre": "minecraft-bedrock-servidor",
+      "desc": "Servidor de Minecraft Bedrock (BDS) en Linux o Docker itzg - server.properties, puertos NetherNet (TCP 19132 + UDP), allowlist, operadores, "
+     },
+     {
+      "id": "cerebro-linux:respaldos",
+      "nombre": "respaldos",
+      "desc": "Respaldos reales en Linux - regla 3-2-1, snapshots btrfs/snapper (sistema) vs restic o borg (datos), qué respaldar (proyectos, Obsidian, ~/."
+     },
+     {
+      "id": "cerebro-linux:servicios-24-7",
+      "nombre": "servicios-24-7",
+      "desc": "Cómo dejar un programa corriendo 24/7 en Linux y comprobar que sigue vivo - systemd (servicios de usuario y de sistema, Restart, linger, jou"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-negocio",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-negocio:contenido-para-redes",
+      "nombre": "contenido-para-redes",
+      "desc": "Crear contenido para TikTok, Reels, Shorts y X de un proyecto - ganchos, guiones cortos, calendario semanal en archivo, reciclar videos, mét"
+     },
+     {
+      "id": "cerebro-negocio:copy-espanol-mx",
+      "nombre": "copy-espanol-mx",
+      "desc": "Escribir textos de venta y redes en español mexicano que no suene a IA (captions, posts, landing, WhatsApp, propuestas) - muletillas de IA a"
+     },
+     {
+      "id": "cerebro-negocio:propuestas-freelance",
+      "nombre": "propuestas-freelance",
+      "desc": "Conseguir y cerrar proyectos en Workana, Fiverr o Upwork - leer el proyecto, propuesta corta, cotizar con comisiones, alcance escrito, pagos"
+     },
+     {
+      "id": "cerebro-negocio:validar-idea",
+      "nombre": "validar-idea",
+      "desc": "Validar una idea de negocio, producto o juego antes de construir - cliente y problema, prueba de 7 días (conversaciones, lista de espera, pr"
+     },
+     {
+      "id": "cerebro-negocio:video-ffmpeg-y-clipping",
+      "nombre": "video-ffmpeg-y-clipping",
+      "desc": "Editar video con ffmpeg en Linux y hacer clipping - recortar, horizontal a vertical 9:16, subtítulos con whisper.cpp, quemar subtítulos, nor"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-solana",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-solana:billetera-sin-custodia",
+      "nombre": "billetera-sin-custodia",
+      "desc": "Conectar Phantom y otras billeteras Solana sin custodiar llaves - Wallet Standard, kit-plugin-wallet, wallet-adapter, Phantom Connect, firma"
+     },
+     {
+      "id": "cerebro-solana:bot-copy-trading",
+      "nombre": "bot-copy-trading",
+      "desc": "Arquitectura de un bot de copy trading Solana 24/7 (Cloudflare Workers, Helius, Jupiter) - detección, parseo del swap, tamaño proporcional, "
+     },
+     {
+      "id": "cerebro-solana:enviar-transacciones-rapido",
+      "nombre": "enviar-transacciones-rapido",
+      "desc": "Hacer que una tx de Solana aterrice rápido y una sola vez - priority fee, compute budget, simulación, Helius Sender, Jito tips y bundles, re"
+     },
+     {
+      "id": "cerebro-solana:helius-rpc-y-tiempo-real",
+      "nombre": "helius-rpc-y-tiempo-real",
+      "desc": "Helius para leer Solana y detectar transacciones de otra billetera en tiempo real - RPC, websockets (transactionSubscribe, logsSubscribe), w"
+     },
+     {
+      "id": "cerebro-solana:jupiter-swaps-y-comisiones",
+      "nombre": "jupiter-swaps-y-comisiones",
+      "desc": "Swaps con Jupiter Swap API V2 (order/execute vs build), cobrar comisión de plataforma o referido como integrador, slippage, errores, rate li"
+     },
+     {
+      "id": "cerebro-solana:montos-y-decimales",
+      "nombre": "montos-y-decimales",
+      "desc": "Montos correctos en Solana - lamports vs SOL, decimales leídos del mint (nunca asumir 6 o 9), BigInt en vez de float, bps, redondeo, convers"
+     },
+     {
+      "id": "cerebro-solana:riesgo-memecoins",
+      "nombre": "riesgo-memecoins",
+      "desc": "Chequeos de riesgo de un token Solana antes de comprarlo o listarlo - mint y freeze authority, LP, holders, dev, migración pump.fun a PumpSw"
+     },
+     {
+      "id": "cerebro-solana:senales-y-backtesting",
+      "nombre": "senales-y-backtesting",
+      "desc": "Evaluar honestamente señales de memecoins (olas de flujo de dinero) - sin lookahead ni survivorship bias, paper trading con costos reales, m"
+     },
+     {
+      "id": "cerebro-solana:solana-fundamentos",
+      "nombre": "solana-fundamentos",
+      "desc": "Base de Solana para escribir código que no falle - cuentas, lamports, SPL Token vs Token-2022, ATAs, rent, compute units, priority fees, com"
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-vida",
+    "activo": false,
+    "skills": [
+     {
+      "id": "cerebro-vida:aprender-y-estudiar",
+      "nombre": "aprender-y-estudiar",
+      "desc": "Claude como tutor que no hace la tarea - explicar con ejemplos, práctica activa, tarjetas Anki importables, resúmenes, plan por fecha de exa"
+     },
+     {
+      "id": "cerebro-vida:cv-y-entrevistas",
+      "nombre": "cv-y-entrevistas",
+      "desc": "CV de una página para primer empleo en México sin experiencia formal, adaptado a cada vacante, carta corta, perfiles en OCC/Computrabajo/Lin"
+     },
+     {
+      "id": "cerebro-vida:finanzas-personales-basicas",
+      "nombre": "finanzas-personales-basicas",
+      "desc": "Finanzas personales en México con ingreso variable - presupuesto CSV, script que categoriza el CSV del banco, fondo de emergencia, separar n"
+     },
+     {
+      "id": "cerebro-vida:productividad-y-organizacion",
+      "nombre": "productividad-y-organizacion",
+      "desc": "Sistema simple con escuela, trabajo y muchos proyectos - una lista de pendientes, priorizar lo que mueve dinero, bloques de tiempo, revisión"
+     },
+     {
+      "id": "cerebro-vida:seguridad-de-cuentas",
+      "nombre": "seguridad-de-cuentas",
+      "desc": "Proteger cuentas personales - gestor de contraseñas, 2FA con passkey/llave/app en vez de SMS, SIM swap y portabilidad en México (NIP 051), c"
+     },
+     {
+      "id": "cerebro-vida:tramites-mexico",
+      "nombre": "tramites-mexico",
+      "desc": "Trámites en México para quien empieza a trabajar o emprender, verificados en fuentes oficiales - CURP, RFC, contraseña y e.firma, regímenes "
+     }
+    ]
+   },
+   {
+    "nombre": "cerebro-web",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cerebro-web:base-de-datos-practica",
+      "nombre": "base-de-datos-practica",
+      "desc": "Elegir y diseñar la base de datos de un proyecto chico (D1/SQLite, Supabase/Postgres, Turso) - esquema, migraciones versionadas, índices, di"
+     },
+     {
+      "id": "cerebro-web:cloudflare-gratis-decisiones",
+      "nombre": "cloudflare-gratis-decisiones",
+      "desc": "Decidir qué producto de Cloudflare usar y si cabe en el plan gratis o el de 5 USD - Workers vs Pages, KV vs D1 vs Durable Objects vs R2 vs Q"
+     },
+     {
+      "id": "cerebro-web:cloudflare-tunnel-y-dominio",
+      "nombre": "cloudflare-tunnel-y-dominio",
+      "desc": "Publicar una app de la casa/servidor con Cloudflare Tunnel (cloudflared) y dominio propio - túnel con nombre, ingress, servicio systemd, DNS"
+     },
+     {
+      "id": "cerebro-web:cobros-y-suscripciones",
+      "nombre": "cobros-y-suscripciones",
+      "desc": "Cobrar suscripciones desde México - Stripe, Mercado Pago o cripto (USDC/SOL con Solana Pay y verificación on-chain), webhooks con firma e id"
+     },
+     {
+      "id": "cerebro-web:landing-que-convierte",
+      "nombre": "landing-que-convierte",
+      "desc": "Estructura y medición de una landing que convierte - hero claro, prueba social real, demo, precios, FAQ, un solo CTA, velocidad, formularios"
+     },
+     {
+      "id": "cerebro-web:seo-tecnico",
+      "nombre": "seo-tecnico",
+      "desc": "SEO técnico y vistas previas al compartir - title y meta, Open Graph y X cards (link bonito en X y WhatsApp), canonical, sitemap.xml, robots"
+     }
+    ]
+   },
+   {
+    "nombre": "superpowers",
+    "activo": true,
+    "skills": [
+     {
+      "id": "superpowers:brainstorming",
+      "nombre": "brainstorming",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:writing-plans",
+      "nombre": "writing-plans",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:executing-plans",
+      "nombre": "executing-plans",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:systematic-debugging",
+      "nombre": "systematic-debugging",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:test-driven-development",
+      "nombre": "test-driven-development",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:verification-before-completion",
+      "nombre": "verification-before-completion",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:subagent-driven-development",
+      "nombre": "subagent-driven-development",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:dispatching-parallel-agents",
+      "nombre": "dispatching-parallel-agents",
+      "desc": ""
+     },
+     {
+      "id": "superpowers:requesting-code-review",
+      "nombre": "requesting-code-review",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "cloudflare",
+    "activo": true,
+    "skills": [
+     {
+      "id": "cloudflare:workers",
+      "nombre": "workers",
+      "desc": ""
+     },
+     {
+      "id": "cloudflare:durable-objects",
+      "nombre": "durable-objects",
+      "desc": ""
+     },
+     {
+      "id": "cloudflare:wrangler",
+      "nombre": "wrangler",
+      "desc": ""
+     },
+     {
+      "id": "cloudflare:agents-sdk",
+      "nombre": "agents-sdk",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "context7",
+    "activo": true,
+    "skills": [
+     {
+      "id": "context7:docs",
+      "nombre": "docs",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "frontend-design",
+    "activo": true,
+    "skills": [
+     {
+      "id": "frontend-design:frontend-design",
+      "nombre": "frontend-design",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "playwright",
+    "activo": true,
+    "skills": [
+     {
+      "id": "playwright:navegador",
+      "nombre": "navegador",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "security-guidance",
+    "activo": true,
+    "skills": [
+     {
+      "id": "security-guidance:revision",
+      "nombre": "revision",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "expo",
+    "activo": false,
+    "skills": [
+     {
+      "id": "expo:expo-router",
+      "nombre": "expo-router",
+      "desc": ""
+     },
+     {
+      "id": "expo:eas-update",
+      "nombre": "eas-update",
+      "desc": ""
+     },
+     {
+      "id": "expo:expo-dev-client",
+      "nombre": "expo-dev-client",
+      "desc": ""
+     }
+    ]
+   },
+   {
+    "nombre": "stripe",
+    "activo": false,
+    "skills": [
+     {
+      "id": "stripe:stripe-best-practices",
+      "nombre": "stripe-best-practices",
+      "desc": ""
+     }
+    ]
+   }
+  ]
+ },
+ "eventos": [
+  {
+   "tipo": "sesion",
+   "proyecto": "bot-copias",
+   "cwd": "/home/usuario/proyectos/bot-copias",
+   "modelo": "claude-opus-5-5",
+   "version": "2.1.325",
+   "rama": "main",
+   "t": 0
+  },
+  {
+   "tipo": "uso",
+   "entrada": 1200,
+   "salida": 0,
+   "cacheLeida": 38000,
+   "cacheCreada": 0,
+   "contexto": 39200,
+   "ventana": 200000,
+   "costoUSD": 0.41,
+   "t": 200
+  },
+  {
+   "tipo": "prompt",
+   "texto": "el bot tarda como 7 segundos en copiar las compras del trader, quiero que baje a 2 o menos. revisa dónde se va el tiempo y arréglalo",
+   "t": 1700
+  },
+  {
+   "tipo": "sugeridas",
+   "skills": [
+    {
+     "id": "cerebro-solana:helius-rpc-y-tiempo-real",
+     "puntaje": 0.91
+    },
+    {
+     "id": "cerebro-solana:enviar-transacciones-rapido",
+     "puntaje": 0.84
+    },
+    {
+     "id": "cerebro-codigo:depurar-rendimiento",
+     "puntaje": 0.77
+    },
+    {
+     "id": "cerebro-solana:bot-copy-trading",
+     "puntaje": 0.71
+    }
+   ],
+   "apagadas": [],
+   "t": 2050
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "Antes de tocar nada necesito medir. Siete segundos pueden venir de la detección, del armado de la transacción o del envío.",
+   "agente": null,
+   "t": 4650
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h1",
+   "fase": "inicio",
+   "nombre": "Skill",
+   "clase": "skill",
+   "resumen": "cerebro-codigo:depurar-rendimiento",
+   "agente": null,
+   "t": 5550
+  },
+  {
+   "tipo": "skill_usada",
+   "id": "cerebro-codigo:depurar-rendimiento",
+   "t": 5610
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h1",
+   "fase": "fin",
+   "ok": true,
+   "ms": 310,
+   "tamano": 5200,
+   "t": 5910
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h2",
+   "fase": "inicio",
+   "nombre": "Skill",
+   "clase": "skill",
+   "resumen": "cerebro-solana:helius-rpc-y-tiempo-real",
+   "agente": null,
+   "t": 6610
+  },
+  {
+   "tipo": "skill_usada",
+   "id": "cerebro-solana:helius-rpc-y-tiempo-real",
+   "t": 6670
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h2",
+   "fase": "fin",
+   "ok": true,
+   "ms": 290,
+   "tamano": 6100,
+   "t": 6950
+  },
+  {
+   "tipo": "dicho",
+   "texto": "Voy a medir cada etapa con marcas de tiempo antes de cambiar nada.",
+   "agente": null,
+   "t": 8150
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h3",
+   "fase": "inicio",
+   "nombre": "Grep",
+   "clase": "buscar",
+   "resumen": "logsSubscribe|getTransaction  src/",
+   "agente": null,
+   "t": 8750
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h3",
+   "fase": "fin",
+   "ok": true,
+   "ms": 410,
+   "tamano": 900,
+   "t": 9170
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h4",
+   "fase": "inicio",
+   "nombre": "Read",
+   "clase": "leer",
+   "resumen": "src/detector.ts",
+   "agente": null,
+   "t": 9670
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h4",
+   "fase": "fin",
+   "ok": true,
+   "ms": 240,
+   "tamano": 7400,
+   "t": 9930
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h5",
+   "fase": "inicio",
+   "nombre": "Read",
+   "clase": "leer",
+   "resumen": "src/copiar.ts",
+   "agente": null,
+   "t": 10330
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h5",
+   "fase": "fin",
+   "ok": true,
+   "ms": 230,
+   "tamano": 5100,
+   "t": 10570
+  },
+  {
+   "tipo": "uso",
+   "entrada": 900,
+   "salida": 640,
+   "cacheLeida": 52000,
+   "cacheCreada": 9800,
+   "contexto": 62700,
+   "ventana": 200000,
+   "costoUSD": 0.58,
+   "t": 10870
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "El detector hace polling cada 5 s con getSignaturesForAddress. Ahí se va casi todo: en promedio 2.5 s de espera, hasta 5.",
+   "agente": null,
+   "t": 12670
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "Opciones: websocket con logsSubscribe (gratis) o transactionSubscribe (plan de pago). Empiezo por la gratis y mido.",
+   "agente": null,
+   "t": 14870
+  },
+  {
+   "tipo": "subagente",
+   "id": "a1",
+   "fase": "inicio",
+   "tipoAgente": "Explore",
+   "descripcion": "Buscar límites de websockets en Workers",
+   "t": 15770
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h6",
+   "fase": "inicio",
+   "nombre": "WebFetch",
+   "clase": "web",
+   "resumen": "developers.cloudflare.com/durable-objects/…/websockets",
+   "agente": "a1",
+   "t": 16270
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h7",
+   "fase": "inicio",
+   "nombre": "Edit",
+   "clase": "editar",
+   "resumen": "src/detector.ts",
+   "agente": null,
+   "t": 16970
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h7",
+   "fase": "fin",
+   "ok": true,
+   "ms": 880,
+   "tamano": 300,
+   "t": 17870
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h6",
+   "fase": "fin",
+   "ok": true,
+   "ms": 1800,
+   "tamano": 14000,
+   "t": 18470
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "Un Durable Object puede sostener el websocket saliente; con hibernación no aplica porque es conexión saliente.",
+   "agente": "a1",
+   "t": 18870
+  },
+  {
+   "tipo": "subagente",
+   "id": "a1",
+   "fase": "fin",
+   "tipoAgente": "Explore",
+   "descripcion": "Buscar límites de websockets en Workers",
+   "t": 19770
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h8",
+   "fase": "inicio",
+   "nombre": "Write",
+   "clase": "editar",
+   "resumen": "src/medir.ts",
+   "agente": null,
+   "t": 20270
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h8",
+   "fase": "fin",
+   "ok": true,
+   "ms": 690,
+   "tamano": 220,
+   "t": 20970
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h9",
+   "fase": "inicio",
+   "nombre": "Bash",
+   "clase": "comando",
+   "resumen": "npm test -- detector",
+   "agente": null,
+   "t": 21570
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h9",
+   "fase": "fin",
+   "ok": false,
+   "ms": 3380,
+   "tamano": 2100,
+   "t": 24970
+  },
+  {
+   "tipo": "uso",
+   "entrada": 1100,
+   "salida": 1900,
+   "cacheLeida": 70500,
+   "cacheCreada": 6200,
+   "contexto": 77800,
+   "ventana": 200000,
+   "costoUSD": 0.79,
+   "t": 25270
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "Falló un test: la reconexión no reintenta si el socket cierra con código 1006. Lo arreglo antes de seguir.",
+   "agente": null,
+   "t": 26670
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h10",
+   "fase": "inicio",
+   "nombre": "Edit",
+   "clase": "editar",
+   "resumen": "src/detector.ts",
+   "agente": null,
+   "t": 27570
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h10",
+   "fase": "fin",
+   "ok": true,
+   "ms": 790,
+   "tamano": 260,
+   "t": 28370
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h11",
+   "fase": "inicio",
+   "nombre": "Bash",
+   "clase": "comando",
+   "resumen": "npm test -- detector",
+   "agente": null,
+   "t": 28870
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h11",
+   "fase": "fin",
+   "ok": true,
+   "ms": 3050,
+   "tamano": 640,
+   "t": 31970
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h12",
+   "fase": "inicio",
+   "nombre": "Bash",
+   "clase": "comando",
+   "resumen": "wrangler deploy --env pruebas",
+   "agente": null,
+   "t": 32670
+  },
+  {
+   "tipo": "espera",
+   "motivo": "permiso",
+   "t": 33570
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h12",
+   "fase": "fin",
+   "ok": true,
+   "ms": 5100,
+   "tamano": 1300,
+   "t": 37770
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h13",
+   "fase": "inicio",
+   "nombre": "Bash",
+   "clase": "comando",
+   "resumen": "node scripts/medir-latencia.mjs --muestras 20",
+   "agente": null,
+   "t": 38370
+  },
+  {
+   "tipo": "herramienta",
+   "id": "h13",
+   "fase": "fin",
+   "ok": true,
+   "ms": 4750,
+   "tamano": 1800,
+   "t": 43170
+  },
+  {
+   "tipo": "uso",
+   "entrada": 1300,
+   "salida": 2600,
+   "cacheLeida": 86000,
+   "cacheCreada": 5400,
+   "contexto": 92700,
+   "ventana": 200000,
+   "costoUSD": 1.02,
+   "t": 43470
+  },
+  {
+   "tipo": "pensamiento",
+   "texto": "Mediana 1.4 s, p95 2.3 s. La detección bajó de ~2.5 s a ~0.4 s. Lo que queda es el envío.",
+   "agente": null,
+   "t": 45070
+  },
+  {
+   "tipo": "dicho",
+   "texto": "Listo: la copia pasó de ~7 s a 1.4 s de mediana (p95 2.3 s), medido con 20 compras de prueba. Cambié el sondeo cada 5 s por un websocket con reconexión.",
+   "agente": null,
+   "t": 46570
+  },
+  {
+   "tipo": "hilo",
+   "objetivo": "Bajar el retraso del bot al copiar de 7 s a 2 s o menos",
+   "ultimoPedido": "revisa dónde se va el tiempo y arréglalo",
+   "archivos": [
+    {
+     "ruta": "src/detector.ts",
+     "veces": 3,
+     "accion": "editado"
+    },
+    {
+     "ruta": "src/medir.ts",
+     "veces": 1,
+     "accion": "creado"
+    },
+    {
+     "ruta": "src/copiar.ts",
+     "veces": 1,
+     "accion": "leído"
+    }
+   ],
+   "comandos": [
+    "npm test -- detector",
+    "wrangler deploy --env pruebas",
+    "node scripts/medir-latencia.mjs --muestras 20"
+   ],
+   "errores": [
+    "test de reconexión falló con código 1006 (corregido)"
+   ],
+   "pendientes": [
+    {
+     "texto": "Medir cada etapa",
+     "estado": "hecho"
+    },
+    {
+     "texto": "Cambiar sondeo por websocket",
+     "estado": "hecho"
+    },
+    {
+     "texto": "Reducir tiempo de envío (p95 2.3 s)",
+     "estado": "pendiente"
+    }
+   ],
+   "turnos": 1,
+   "t": 46970
+  },
+  {
+   "tipo": "fin_turno",
+   "ms": 58000,
+   "pasos": 13,
+   "t": 47270
+  },
+  {
+   "tipo": "espera",
+   "motivo": "respuesta",
+   "t": 53270
+  }
+ ]
+}

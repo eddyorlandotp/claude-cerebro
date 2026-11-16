@@ -1,0 +1,5 @@
+#!/bin/sh
+# Lanzador de la araña. Claude Code pone la carpeta bin/ del plugin en el PATH del Bash de Claude
+# mientras el plugin está habilitado, así que basta escribir `arana ...`.
+command -v node >/dev/null 2>&1 || { echo "arana: hace falta Node 20 o más nuevo en el PATH" >&2; exit 127; }
+exec node "$(dirname "$0")/../arana/bin/arana.mjs" "$@"

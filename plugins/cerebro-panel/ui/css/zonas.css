@@ -1,0 +1,218 @@
+/* ==========================================================================
+   Telaraña · contenido de cada zona. El fondo siempre es transparente: debajo
+   está el lienzo. Nada de tarjetas: líneas de 1 px y espacio.
+   ========================================================================== */
+
+/* ---------- Pensamiento -------------------------------------------------------
+   pensamiento.js escribe --cara-x / --cara-y / --cara-d (px dentro de la zona)
+   para que burbujas, pie y subagentes se acomoden alrededor de la cara, que se
+   dibuja en el lienzo. */
+#z-pensamiento .zona-int { --cara-x: 50%; --cara-y: 54%; --cara-d: 120px; --esc: 1; }
+
+.burbujas {
+  position: absolute; left: 0; right: 0; top: 44px;
+  height: calc(var(--cara-y) - var(--cara-d) * 0.5 - 44px - 58px * var(--esc));
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  gap: calc(30px * var(--esc)); pointer-events: none;
+}
+.burbuja {
+  position: relative; flex: none;
+  max-width: min(46ch, 62%);
+  padding: calc(14px * var(--esc)) calc(22px * var(--esc));
+  font-size: calc(1.15rem * var(--esc)); line-height: 1.42; color: var(--tinta);
+  transform: translateX(var(--dx, 0px));
+  transition: opacity 160ms linear;
+}
+.burbuja svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.burbuja svg path, .burbuja svg circle { fill: none; stroke: var(--cian); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.burbuja .rastro { transition: opacity 160ms linear; }
+.burbuja[data-edad="1"] { opacity: 0.5; }
+.burbuja[data-edad="2"] { opacity: 0.24; }
+.burbuja[data-edad="1"] .rastro, .burbuja[data-edad="2"] .rastro { opacity: 0; }
+.burbuja.sale { opacity: 0; }
+/* Lo que Claude dice: rectángulo con pico, en tinta (no cian) para distinguir hablar de pensar. */
+.burbuja.dicho { color: var(--tinta); max-width: min(58ch, 74%); }
+.burbuja.dicho svg path { stroke: var(--tinta-2); }
+.burbuja.toca { color: var(--ambar); font-weight: 500; }
+.burbuja.toca svg path { stroke: var(--ambar); }
+
+.pie {
+  position: absolute; left: 0; right: 0;
+  top: calc(var(--cara-y) + var(--cara-d) * 0.5 + 30px * var(--esc));
+  display: flex; flex-direction: column; align-items: center; gap: calc(14px * var(--esc));
+  padding: 0 var(--lado);
+}
+.pie-estado { display: flex; align-items: center; gap: calc(10px * var(--esc)); height: calc(24px * var(--esc)); max-width: 100%; font-size: calc(1.15rem * var(--esc)); background: var(--fondo); padding: 0 10px; }
+.pie-verbo { color: var(--tinta); font-weight: 500; white-space: nowrap; }
+.pie-objeto { color: var(--tinta-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pie-estado[data-tono="ambar"] .pie-verbo, .pie-estado[data-tono="ambar"] .monito { color: var(--ambar); }
+.pie-estado[data-tono="rosa"] .pie-verbo, .pie-estado[data-tono="rosa"] .monito { color: var(--rosa); }
+.pie-estado[data-tono="apagado"] .pie-verbo { color: var(--tinta-2); font-weight: 400; }
+.pie-vacio { color: var(--tinta-2); text-align: center; max-width: 40ch; font-size: calc(1rem * (0.4 + 0.6 * var(--esc))); }
+
+/* Monito: pictograma animado de lo que hace. Trazo 1.5 px, un solo estilo. */
+.monito { width: calc(22px * var(--esc)); height: calc(22px * var(--esc)); flex: none; color: var(--cian); display: inline-flex; }
+.monito:empty { display: none; }
+.monito svg, .ico { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; overflow: visible; }
+.ico { display: inline-block; }
+.monito .m-barre  { animation: m-barre 1400ms var(--va-y-viene) infinite alternate; }
+.monito .m-hoja   { animation: m-hoja 1100ms steps(1) infinite; transform-origin: 12px 12px; }
+.monito .m-cursor { animation: m-parpadea 900ms steps(1) infinite; }
+.monito .m-lapiz  { animation: m-lapiz 700ms var(--va-y-viene) infinite alternate; }
+.monito .m-gira   { animation: m-gira 6s linear infinite; transform-origin: 12px 12px; }
+.monito .m-arena  { animation: m-arena 2400ms var(--va-y-viene) infinite; transform-origin: 12px 12px; }
+.monito .m-late   { animation: m-parpadea 1400ms steps(1) infinite; }
+@keyframes m-barre { from { transform: translateX(-2.5px); } to { transform: translateX(2.5px); } }
+@keyframes m-hoja { 0% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes m-parpadea { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes m-lapiz { from { transform: translate(-1.5px, 0); } to { transform: translate(2px, 0); } }
+@keyframes m-gira { to { transform: rotate(360deg); } }
+@keyframes m-arena { 0%, 70% { transform: rotate(0); } 100% { transform: rotate(180deg); } }
+
+/* Fichas de skills sugeridas: etiquetas recuadradas como las de la biblioteca. */
+.fichas { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; max-width: min(72ch, 100%); min-height: 24px; }
+.fichas-rotulo { flex-basis: 100%; text-align: center; font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-3); margin-bottom: 2px; }
+.ficha {
+  border: 1px solid var(--cian); color: var(--cian); background: var(--fondo);
+  padding: 2px 8px; font-size: calc(0.82rem * (0.4 + 0.6 * var(--esc))); line-height: 1.4; white-space: nowrap;
+  animation: entra 220ms var(--sale) both;
+}
+.ficha.usada { background: var(--cian); color: var(--fondo); font-weight: 500; }
+.ficha.apagada { border-color: var(--ambar); color: var(--ambar); }
+.ficha.apagada::after { content: " · apagada"; }
+@keyframes entra { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
+
+/* Subagentes: fila bajo las fichas. La carita se dibuja en el lienzo sobre el hueco .sub-cara. */
+.subagentes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; max-width: 100%; }
+.subagentes:empty { display: none; }
+.sub-etq {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center;
+  max-width: 54ch; font-size: calc(0.82rem * (0.4 + 0.6 * var(--esc))); line-height: 1.35; color: var(--tinta-2);
+  transition: opacity 160ms linear; animation: entra 220ms var(--sale) both;
+}
+.sub-cara { width: max(24px, calc(var(--cara-d) * 0.3)); aspect-ratio: 1; }
+.sub-txt { min-width: 0; background: var(--fondo); padding: 2px 8px 2px 0; }   /* el fondo va solo en el texto: la carita se dibuja debajo, en el lienzo */
+.sub-txt > * { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sub-txt b { font-weight: 500; color: var(--tinta); }
+.sub-txt .nota { color: var(--tinta-3); }
+.sub-etq.sale { opacity: 0; }
+
+/* ---------- Contexto ---------------------------------------------------------- */
+.ctx { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding-top: 8px; }
+.ctx-arriba { display: flex; align-items: flex-end; gap: 20px; }
+.ctx-num { font-family: var(--cond); font-weight: 600; font-size: 3.2rem; line-height: 0.86; color: var(--tinta); letter-spacing: -0.01em; }
+.ctx-num small { font-size: 0.42em; font-weight: 500; color: var(--tinta-2); margin-left: 3px; }
+.ctx-num[data-tono="ambar"] { color: var(--ambar); }
+.ctx-num[data-tono="rosa"] { color: var(--rosa); }
+.ctx-lado { display: flex; flex-direction: column; gap: 1px; font-size: 0.85rem; color: var(--tinta-2); padding-bottom: 1px; }
+.ctx-lado b { font-weight: 500; color: var(--tinta); }
+.ctx-costo { margin-left: auto; text-align: right; font-size: 0.85rem; color: var(--tinta-2); display: flex; flex-direction: column; gap: 1px; padding-bottom: 1px; }
+.ctx-costo b { font-weight: 500; color: var(--tinta); font-size: 1.15rem; line-height: 1.1; }
+.ctx-costo span { color: var(--tinta-3); }
+.ctx-barra { display: grid; grid-template-columns: repeat(40, 1fr); gap: 2px; height: 10px; flex: none; }
+.ctx-barra i { background: var(--linea); }
+.ctx-barra i.on { background: var(--cian); }
+.ctx-barra i.borde { background: var(--tinta); }
+.ctx-barra[data-tono="ambar"] i.on { background: var(--ambar); }
+.ctx-barra[data-tono="rosa"] i.on { background: var(--rosa); }
+.ctx-cifras { display: grid; grid-template-columns: repeat(3, auto) 1fr; column-gap: 28px; align-items: end; }
+.ctx-cifra { display: flex; flex-direction: column; }
+.ctx-cifra dt, .ctx-eti { font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-3); }
+.ctx-cifra dd { margin: 0; font-size: 1.15rem; font-weight: 500; color: var(--tinta); line-height: 1.25; }
+.ctx-nota { justify-self: end; text-align: right; font-size: 0.8rem; color: var(--tinta-3); max-width: 22ch; line-height: 1.3; }
+.ctx-hist { display: flex; align-items: flex-end; gap: 3px; height: clamp(18px, 3.2vh, 40px); flex: none; border-bottom: 1px solid var(--linea); position: relative; }
+.ctx-hist i { width: 8px; background: var(--cian-tenue); transform-origin: bottom; }
+.ctx-hist i:last-of-type { background: var(--cian); }
+.ctx-hist i.corte { width: 0; height: 100% !important; border-left: 1px solid var(--linea-2); background: none; margin: 0 3px; }
+.ctx-hist .ctx-eti { position: absolute; right: 0; bottom: 4px; }
+.ctx dl { margin: 0; }
+
+/* ---------- Hilo ------------------------------------------------------------- */
+.hilo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; padding-top: 8px; }
+.hilo-texto { min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 7px; font-size: 0.9rem; }
+.hilo-tela { min-width: 0; }   /* hueco reservado: la telaraña se dibuja en el lienzo */
+.hilo-fila { display: grid; grid-template-columns: 9.5ch minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
+.hilo-fila > dt { font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-3); }
+.hilo-fila > dd { margin: 0; min-width: 0; color: var(--tinta); }
+.hilo-fila .una { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.hilo-fila .dos { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hilo-fila .tenue { color: var(--tinta-2); }
+.hilo-lista li { display: flex; gap: 8px; align-items: baseline; white-space: nowrap; min-width: 0; }
+.hilo-lista li > span:not(.caja):not(.veces):not(.accion) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.hilo-lista .veces { color: var(--cian); flex: none; }
+.hilo-lista .accion { color: var(--tinta-3); flex: none; }
+.hilo-lista .caja { width: 9px; height: 9px; border: 1px solid var(--tinta-2); flex: none; align-self: center; position: relative; }
+.hilo-lista .hecho { color: var(--tinta-3); }
+.hilo-lista .hecho > span:last-child { text-decoration: line-through; text-decoration-color: var(--tinta-3); }
+.hilo-lista .hecho .caja { border-color: var(--tinta-3); }
+.hilo-lista .hecho .caja::after { content: ""; position: absolute; inset: 2px; background: var(--tinta-3); }
+.hilo-lista .en-curso .caja { border-color: var(--cian); }
+.hilo-lista .en-curso .caja::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: 3px; background: var(--cian); }
+.hilo-fila.error > dt, .hilo-fila.error > dd { color: var(--rosa); }
+.hilo dl { margin: 0; display: contents; }
+
+/* ---------- Actividad -------------------------------------------------------- */
+.registro { flex: 1; min-height: 0; overflow: hidden; margin-top: 8px; font-size: 0.88rem; line-height: 1.62; display: flex; flex-flow: column wrap; align-content: flex-start; column-gap: 40px; }
+.registro li { width: 100%; flex: none; display: grid; grid-template-columns: 8ch 6.5ch minmax(0, 1fr) auto; column-gap: 12px; white-space: nowrap; }
+.registro time { color: var(--tinta-3); }
+.registro .verbo { font-family: var(--cond); font-weight: 600; font-size: 0.86rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-2); }
+.registro .detalle { overflow: hidden; text-overflow: ellipsis; color: var(--tinta); min-width: 0; }
+.registro .cola { color: var(--tinta-3); }
+.registro li.tenue .detalle { color: var(--tinta-2); }
+.registro li.curso .verbo { color: var(--cian); }
+.registro li.error .verbo, .registro li.error .detalle { color: var(--rosa); }
+.registro li.espera .verbo, .registro li.espera .detalle { color: var(--ambar); }
+.registro li.sub .detalle::before { content: "└ "; color: var(--tinta-3); }
+
+/* ---------- Flujo ------------------------------------------------------------ */
+.flujo-previos { font-size: 0.8rem; color: var(--tinta-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.flujo { flex: 1; min-height: 0; position: relative; padding-top: 14px; display: flex; flex-direction: column; gap: 18px; }
+/* Un renglón = fila principal + fila de subagentes. En vertical hay dos renglones. */
+.renglon { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); column-gap: 30px; row-gap: 16px; grid-auto-rows: min-content; }
+.bloque {
+  grid-row: 1; min-width: 0;
+  border: 1px solid var(--linea-2); background: var(--fondo);
+  font-size: 0.85rem; line-height: 1.4;
+  animation: entra 220ms var(--sale) both;
+}
+.bloque.sub { grid-row: 2; border-style: dashed; }
+.bloque-cab {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding: 3px 8px; background: var(--fondo-2); border-bottom: 1px solid var(--linea-2);
+  position: relative; overflow: hidden; white-space: nowrap;
+}
+.bloque-nombre { color: var(--tinta); font-weight: 500; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.bloque-clase { font-family: var(--cond); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-2); flex: none; }
+.bloque-res { padding: 5px 8px 0; color: var(--tinta); white-space: nowrap; overflow: hidden; }
+.bloque-res.dos { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; padding-bottom: 5px; color: var(--tinta-2); }
+.bloque-dat { padding: 0 8px 5px; color: var(--tinta-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.4em; }
+.bloque.sub .bloque-res { padding-top: 3px; } .bloque.sub .bloque-dat { padding-bottom: 3px; }
+
+.bloque.curso { border-color: var(--cian); }
+.bloque.curso .bloque-cab { border-bottom-color: var(--cian-tenue); }
+.bloque.curso .bloque-clase { color: var(--cian); }
+/* Barra de progreso indeterminada de 1 px en la cabecera del bloque en curso. */
+.bloque.curso .bloque-cab::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 40%; height: 1px; background: var(--cian);
+  animation: corre 1100ms linear infinite;
+}
+@keyframes corre { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.bloque.fallo { border-color: var(--rosa); }
+.bloque.fallo .bloque-cab { border-bottom-color: var(--rosa); }
+.bloque.fallo .bloque-clase, .bloque.fallo .bloque-dat { color: var(--rosa); }
+.bloque.espera { border-color: var(--ambar); }
+.bloque.espera .bloque-cab { border-bottom-color: var(--ambar); }
+.bloque.espera .bloque-clase, .bloque.espera .bloque-dat { color: var(--ambar); }
+.bloque.espera .bloque-cab::after { background: var(--ambar); animation-duration: 2200ms; }
+/* Pila de pasos viejos comprimidos a la izquierda. */
+.bloque.pila { border-style: solid; border-color: var(--linea-2); display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; gap: 2px; position: relative; }
+.bloque.pila::before, .bloque.pila::after { content: ""; position: absolute; top: 4px; bottom: 4px; width: 1px; background: var(--linea-2); }
+.bloque.pila::before { left: 4px; } .bloque.pila::after { left: 9px; }
+.pila-n { font-family: var(--cond); font-weight: 600; font-size: 1.6rem; line-height: 1; color: var(--tinta-2); }
+.pila-t { color: var(--tinta-3); font-size: 0.8rem; }
+.flujo-vacio { color: var(--tinta-3); padding-top: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .monito * { animation: none !important; }
+  .bloque, .ficha { animation-duration: 1ms; }
+}

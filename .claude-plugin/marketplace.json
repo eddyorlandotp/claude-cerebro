@@ -74,6 +74,11 @@
       "name": "cerebro-apps",
       "source": "./plugins/cerebro-apps",
       "description": "Apps móviles con Expo, PWA, publicar en tiendas, extensiones de Chrome, apps de escritorio con Tauri y bots de Discord."
+    },
+    {
+      "name": "cerebro-panel",
+      "source": "./plugins/cerebro-panel",
+      "description": "Panel local sin IA para ver a Claude Code trabajar: cara que piensa, araña que recomienda skills y teje el hilo de la sesión, flujo por bloques y medidor de contexto. Corre en tu compu, cero tokens extra."
     }
   ]
 }
