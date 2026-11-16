@@ -54,7 +54,7 @@ Respuesta: `status` (`Success`/`Failed`), `signature`, `code`, `totalInputAmount
 | -1005 | Agregador | Expiró antes de aterrizar (se firmó tarde) | Firmar más rápido, nueva orden |
 | -2000…-2004 | RFQ | No aterrizó / desconocido / payload inválido / cotización expirada / rechazada | Nueva orden |
 
-Antes de pedir una orden nueva tras un fallo, confirma por `signature` en tu RPC que la anterior **no** aterrizó (ver idempotencia en `enviar-transacciones-rapido`).
+Antes de pedir una orden nueva tras un fallo, confirma por `signature` en tu RPC que la anterior **no** aterrizó **y que ya no puede aterrizar**: la tx firmada sigue siendo válida hasta el `lastValidBlockHeight` de esa orden (rutas agregador) o su `expireAt` (RFQ). Si `/execute` devolvió `signature` y la orden aún no expira, espera a que expire o a ver la firma confirmada/fallida antes de pedir otra firma; si no, pueden ejecutarse las dos (compra doble). La doc de Jupiter no describe reintentos de `/execute`; la regla viene de https://solana.com/docs/core/transactions/retry (ver idempotencia en `enviar-transacciones-rapido`).
 
 ## `GET https://api.jup.ag/swap/v2/build`
 
@@ -78,9 +78,11 @@ Requeridos: `inputMint`, `outputMint`, `amount`, `taker`.
 | `tipAmount` | — | Lamports de tip para `tx.jup.ag` (mínimo 1 000 000) |
 | `transactionVersion` | `"0"` | `"1"` devuelve instrucciones v1 (sin ALTs; compute budget como campos) |
 
-Respuesta: `computeBudgetInstructions` (solo precio; vacío en v1), `setupInstructions`, `swapInstruction`, `cleanupInstruction`, `otherInstructions`, `tipInstruction` (si mandaste `tipAmount`), `addressesByLookupTableAddress`, `transactionVersion`, `computeUnitPrice` (v1), `blockhashWithMetadata`.
+Respuesta: cotización (`inAmount`, `outAmount`, `otherAmountThreshold` = salida mínima tras slippage, `slippageBps`, `priceImpactPct`, `routePlan`), `computeBudgetInstructions` (solo precio; vacío en v1), `setupInstructions`, `swapInstruction`, `cleanupInstruction`, `otherInstructions`, `tipInstruction` (si mandaste `tipAmount`), `addressesByLookupTableAddress`, `transactionVersion`, `computeUnitPrice` (v1), `blockhashWithMetadata`.
 
 Instrucción = `{ programId, accounts: [{ pubkey, isWritable, isSigner }], data (base64) }`.
+
+Orden del ejemplo oficial: límite de CU (tuyo) → `computeBudgetInstructions` → `setupInstructions` → `swapInstruction` → tus instrucciones → `cleanupInstruction` → `otherInstructions` → `tipInstruction`.
 
 Las instrucciones de V2 **no emiten fee events**: para saber cuánto recibiste, lee los balances de token pre/post de la transacción confirmada.
 

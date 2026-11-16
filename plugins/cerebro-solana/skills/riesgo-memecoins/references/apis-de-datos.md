@@ -26,7 +26,7 @@ Precios y límites cambian. Antes de depender de uno, vuelve a abrir la URL de l
 ## Birdeye (Birdeye Data)
 
 - Llave obligatoria en header `X-API-KEY`. Docs: https://data.birdeye.so/docs/llms.txt
-- Planes (USD/mes, compute units incluidas, rate limit por cuenta): Standard $0, 30 000 CU, 1 rps, solo 3 endpoints · Lite $39, 2.5M CU, 15 rps · Starter $99, 8M CU, 15 rps · Premium $199, 20M CU, 50 rps + websockets · Business $499, 60M CU, 100 rps. Fuente: https://data.birdeye.so/docs/guides/payment/pricing.md
+- Planes (USD/mes, compute units incluidas, rate limit por cuenta): Standard $0, 30 000 CU, 1 rps, acceso limitado (la página de rate limits dice "3 endpoints" pero la tabla de accesibilidad por paquete marca decenas para Standard: verificar en https://data.birdeye.so/docs/guides/data-accessibility-by-packages.md antes de depender de esto) · Lite $39, 2.5M CU, 15 rps · Starter $99, 8M CU, 15 rps · Premium $199, 20M CU, 50 rps + websockets · Business $499, 60M CU, 100 rps. Fuente: https://data.birdeye.so/docs/guides/payment/pricing.md
 - Cada endpoint cuesta distintas CU; revisa el costo antes de ponerlo en un loop.
 
 ## GeckoTerminal / CoinGecko onchain

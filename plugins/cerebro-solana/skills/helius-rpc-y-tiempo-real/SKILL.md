@@ -11,13 +11,13 @@ Helius renombró y reorganizó productos en 2025–2026: los websockets "enhance
 
 - Índice oficial: `https://www.helius.dev/docs/llms.txt`; cada página tiene versión `.md` (p. ej. `https://www.helius.dev/docs/rpc/websocket.md`). Usa WebFetch o Context7 antes de escribir código.
 - Planes, créditos y límites cambian seguido: los de abajo son a nov 2026; revisa `https://www.helius.dev/docs/billing/plans.md` antes de que el usuario pague o dependa de un límite.
-- El MCP oficial `helius-mcp` es **local** (`npx helius-mcp@latest`) y necesita API key; además puede enviar transacciones. No viene en este plugin. Si el usuario lo quiere: `claude mcp add helius npx helius-mcp@latest` y la key en la variable `HELIUS_API_KEY` (que la ponga él; tú no la imprimas). Recuérdale que confirme cualquier acción que mueva fondos.
+- El MCP oficial `helius-mcp` es **local** (`npx helius-mcp@latest`) y necesita API key; además puede enviar transacciones. No viene en este plugin. Si el usuario lo quiere, que lo agregue en **modo solo lectura** (no puede firmar, enviar ni comprar créditos): `claude mcp add helius -- npx helius-mcp@latest --read-only` (o variable `HELIUS_MCP_READ_ONLY=1`), con la key en la variable `HELIUS_API_KEY` (que la ponga él; tú no la imprimas). Sin ese modo el servidor expone transferencias de SOL/tokens, staking, generar keypairs y pagos de plan: no lo uses así en un flujo automático.
 
 ## Endpoints base
 
 - RPC HTTP: `https://mainnet.helius-rpc.com/?api-key=KEY` (devnet: `devnet.helius-rpc.com`).
 - WebSocket (LaserStream WebSocket): `wss://mainnet.helius-rpc.com/?api-key=KEY`. Métodos estándar de Solana + extensiones Helius (`transactionSubscribe`, `accountSubscribe` con filtros).
-- Gatekeeper (beta): `beta.helius-rpc.com` mismo API key, mismos métodos y precios, quita a Cloudflare del camino (Helius reporta de decenas a cientos de ms menos). Solo mainnet. Pruébalo midiendo, no lo asumas.
+- Gatekeeper (beta): `beta.helius-rpc.com` mismo API key, mismos métodos y precios, quita a Cloudflare del camino (Helius reporta de decenas a cientos de ms menos). Solo mainnet. Pruébalo midiendo, no lo asumas. Parsed Streams, Preconfirmations y `preprocessedSubscribe` se sirven **solo** desde `wss://beta.helius-rpc.com/?api-key=KEY` (no desde `mainnet.helius-rpc.com`).
 - La API key en URL es un secreto: ponla en secrets del Worker, nunca en el frontend ni en logs (enmascara `api-key=` al loguear URLs).
 
 ## Planes y créditos (a nov 2026 — verifica en https://www.helius.dev/docs/billing/plans.md)
@@ -108,11 +108,11 @@ Deja el bot corriendo en modo "solo observar", haz tú una compra pequeña con l
 
 ## Fuentes (verificado nov 2026)
 
-- https://www.helius.dev/docs/llms.txt (catálogo, endpoints, Gatekeeper, Enhanced en mantenimiento)
+- https://www.helius.dev/docs/llms.txt (catálogo, endpoints, Gatekeeper y qué productos viven solo en `beta.helius-rpc.com`, Enhanced en mantenimiento)
 - https://www.helius.dev/docs/billing/plans.md, https://www.helius.dev/docs/billing/credits.md, https://www.helius.dev/docs/billing/rate-limits.md
 - https://www.helius.dev/docs/rpc/websocket.md (requisito de plan, inactividad de 10 min, reconexión)
 - https://www.helius.dev/docs/rpc/websocket/transaction-subscribe.md
 - https://www.helius.dev/docs/laserstream.md y https://www.helius.dev/docs/laserstream/clients.md (plan Business, bindings nativos)
 - https://www.helius.dev/docs/parsed-streams.md (commitment confirmed), https://www.helius.dev/docs/parsed-events.md, https://www.helius.dev/docs/webhooks.md
-- https://www.helius.dev/docs/agents/mcp.md (helius-mcp local con API key)
+- https://www.helius.dev/docs/agents/mcp.md (helius-mcp local con API key, modo `--read-only`, acciones de escritura)
 - https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/ , https://developers.cloudflare.com/durable-objects/best-practices/websockets/ , https://developers.cloudflare.com/durable-objects/platform/pricing/ , https://developers.cloudflare.com/durable-objects/platform/limits/ , https://developers.cloudflare.com/workers/platform/limits/ , https://developers.cloudflare.com/durable-objects/reference/data-location/

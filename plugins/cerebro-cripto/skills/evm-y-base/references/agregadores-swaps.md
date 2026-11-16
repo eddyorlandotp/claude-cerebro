@@ -27,8 +27,9 @@ Lee esto antes de escribir código de swaps en EVM. Confirma cada parámetro en 
 ## 1inch (1inch Business)
 
 - Base: `https://api.1inch.com`; Classic Swap v6.1: `/swap/v6.1/{chainId}/quote` y `/swap/v6.1/{chainId}/swap` (confirma rutas y parámetros en la doc antes de usarlos).
-- Auth: header `Authorization: Bearer <API_KEY>`. La key sale del portal (registro, proyecto; la página menciona KYC/KYB).
-- Plan gratis "Dev" (a nov 2026): 100 000 llamadas/mes y 60 solicitudes/minuto, sin cobro automático por excedente.
+- Auth: header `Authorization: Bearer <API_KEY>`. La key sale del portal (registro self-serve sin aprobación; el KYC/KYB que menciona la doc es para resolvers y market makers, no para usar la API). Es un bearer token: nunca en el frontend ni en el repo.
+- Plan gratis "Dev" (a nov 2026): 1 solicitud por segundo (RPS) y 100 000 llamadas/mes; al llegar al límite responde 429, sin cobro por excedente. Verifícalo en https://business.1inch.com/portal/llms-full.txt antes de depender de esto.
+- **Fee de infraestructura de 1inch** (aparte de tu comisión y de la suscripción): se descuenta del monto de destino de cada swap por API. A nov 2026 en plan Dev: 10 bps en stablecoins y 30 bps en el resto (Startup 7/20, Pro 4/10, Business 2/5). Inclúyelo al mostrar el costo al usuario y al comparar contra 0x.
 - **Comisión de integrador NO incluida en el plan Dev.** En Classic Swap, `fee` + `referrer` se ignoran sin error: el swap se ejecuta y el `referrer` no recibe nada. En Fusion/Fusion+ la cotización falla con 400 (`FEE_NOT_ALLOWED`, `INTEGRATOR_FEE_DISABLED`, `CUSTOMER_FEE_DISABLED`). Para cobrar: plan de pago y habilitarlo por organización.
 - Tokens con fee al transferir + parámetros `fee`/`referrer` pueden hacer que la tx falle siempre (lo dice su FAQ).
 - Índice para agentes: `https://business.1inch.com/llms.txt` y `https://business.1inch.com/portal/llms.txt`.

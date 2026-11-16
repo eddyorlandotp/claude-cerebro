@@ -37,7 +37,7 @@ Nunca inventes la subred (`192.168.1.0/24`); usa la que salió.
 
 ```bash
 sudo ufw allow from 192.168.X.0/24 to any port 22 proto tcp comment 'ssh solo LAN'
-sudo ufw allow 19132/tcp comment 'minecraft bedrock'
+sudo ufw allow 19132 comment 'minecraft bedrock'   # sin /tcp ni /udp abre ambos; Bedrock usa TCP + UDP (ver minecraft-bedrock-servidor)
 sudo ufw status numbered      # para borrar: sudo ufw delete NUM
 ```
 

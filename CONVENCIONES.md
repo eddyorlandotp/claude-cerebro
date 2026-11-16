@@ -1,6 +1,6 @@
 # Convenciones para escribir skills de claude-cerebro
 
-Este repo es un marketplace de plugins para **Claude Code** (la app de terminal). El dueño, Eddy, es un emprendedor mexicano de 18 años que **no sabe programar**: construye todo dirigiendo a Claude Code. Usa Linux (CachyOS + Hyprland + fish shell). Sus proyectos: una terminal web de trading de memecoins en Solana (Jupiter, Helius, Cloudflare Workers/Tunnel), un bot de copy trading de Solana 24/7 en Cloudflare Workers, juegos de Roblox (desarrollados en Linux), un juego indie para Steam, home lab y servidor de Minecraft Bedrock, y contenido para redes/clipping. Su queja: Claude "se sabe la teoría pero no la aplica": planea mal, adivina APIs, declara cosas terminadas sin probarlas.
+Este repo es un marketplace de plugins para **Claude Code** (la app de terminal). El usuario construye todo **dirigiendo a Claude Code, sin escribir código él mismo**, en Linux (CachyOS + Hyprland + fish). Proyectos típicos: una terminal web de trading en Solana (Jupiter, Helius, Cloudflare Workers/Tunnel), un bot de copy trading 24/7, juegos de Roblox desarrollados en Linux, un juego indie para Steam, home lab y servidor de Minecraft Bedrock, y contenido para redes. El problema a resolver: Claude "se sabe la teoría pero no la aplica": planea mal, adivina APIs y declara cosas terminadas sin probarlas.
 
 El objetivo de cada skill es **corregir comportamiento concreto** de Claude en esa área, no ser un tutorial.
 
@@ -21,7 +21,7 @@ plugins/<plugin>/
 ```markdown
 ---
 name: <igual-que-la-carpeta>
-description: <qué hace + CUÁNDO usarla, con palabras clave en español e inglés que el usuario diría. Máx ~300 caracteres. Sin < ni >.>
+description: <qué hace + CUÁNDO usarla, con palabras clave en español e inglés que el usuario diría. Máx 250 caracteres (ideal) y nunca más de 300. Sin < ni >.>
 ---
 ```
 
@@ -34,7 +34,7 @@ description: <qué hace + CUÁNDO usarla, con palabras clave en español e ingl�
 5. **Incluye una regla de "verifica antes de confiar"**: indica a Claude que confirme APIs con Context7 (MCP `context7`, si está instalado) o WebFetch a la doc oficial antes de escribir código contra una API externa.
 6. **Seguridad y dinero real**: en todo lo de cripto/pagos, reglas duras: nunca pedir, imprimir, loguear ni commitear llaves privadas/seed phrases; billeteras dedicadas con poco saldo; simular antes de enviar; límites de pérdida; confirmación del usuario antes de cualquier acción que mueva fondos reales o sea irreversible.
 7. **Adaptado a un no-programador**: cuando la skill implique una decisión, Claude debe explicar en 1–3 frases simples qué va a hacer y por qué, y al terminar decir cómo comprobarlo uno mismo.
-8. **No dupliques** lo que ya cubren estos plugins oficiales que Eddy también instalará: `superpowers` (brainstorming, writing-plans, TDD, systematic-debugging, verification-before-completion, subagent-driven-development, code review), `cloudflare` (APIs de Workers/Wrangler/DO), `context7`, `frontend-design`, `playwright`, `supabase`, `stripe`, `mercadopago`, `security-guidance`, `expo`, `mcp-server-dev`, `plugin-dev`, `mattpocock-skills`, `chrome-devtools-mcp`, `vercel`, `netlify-skills`, y de anthropics/skills: `claude-api` y `document-skills` (pdf/docx/xlsx/pptx). Puedes referirte a ellos ("usa la skill systematic-debugging de superpowers si está disponible").
+8. **No dupliques** lo que ya cubren estos plugins oficiales que el usuario también instala: `superpowers` (brainstorming, writing-plans, TDD, systematic-debugging, verification-before-completion, subagent-driven-development, code review), `cloudflare` (APIs de Workers/Wrangler/DO), `context7`, `frontend-design`, `playwright`, `supabase`, `stripe`, `mercadopago`, `security-guidance`, `expo`, `mcp-server-dev`, `plugin-dev`, `chrome-devtools-mcp`, `vercel`, `netlify-skills`, y de anthropics/skills: `claude-api` y `document-skills` (pdf/docx/xlsx/pptx). Puedes referirte a ellos ("usa la skill systematic-debugging de superpowers si está disponible").
 9. **Sin datos personales** (el repo puede ser público): nada de direcciones de billetera, teléfonos, correos, nombres de clientes. Habla de "el usuario".
 10. Licencia: si adaptas ideas de un repo MIT, menciónalo en Fuentes. No copies texto largo literal de documentación.
 

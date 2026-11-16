@@ -43,14 +43,19 @@ async function onTraderTx(tx) {
   const swap = parseSwap(tx, TRADER);                      // por balances, ver abajo
   const key = `${sig}:${swap.side}`;
   if (!insertIfAbsent("ops", { key, trader_sig: sig, status: "observed", ... })) return; // dedupe
-  if (health.paused || overDailyLoss() || overHourlyCap()) return skip(key, "pausa/límite");
   if (swap.side === "no-swap" || swap.side === "unsupported") return skip(key, swap.side);
+  // Por defecto la pausa y los límites frenan solo las COMPRAS. Las ventas siempre se copian:
+  // frenarlas deja al bot con tokens que el trader ya vendió. Solo si el usuario lo pide explícitamente
+  // (CONFIG.limitesFrenanVentas = true) se frenan también las ventas.
+  const frena = swap.side === "buy" || CONFIG.limitesFrenanVentas === true;
+  if (frena && (health.paused || overDailyLoss() || overHourlyCap())) return skip(key, "pausa/límite");
 
   const size = swap.side === "buy"
     ? mulBps(botSolAvailable() - RESERVE, swap.pctBps)      // BigInt, redondeo hacia abajo
     : mulBps(position(swap.mint).tokenRaw, swap.pctBps);
   if (size < MIN_SIZE[swap.side]) return skip(key, "monto muy chico");
-  const capped = min(size, MAX_PER_TRADE);
+  // El tope por operación está en lamports: solo aplica a compras (en ventas `size` son tokens raw, otra unidad).
+  const capped = swap.side === "buy" ? min(size, MAX_PER_TRADE_LAMPORTS) : size;
 
   const q = await jupBuild({ inputMint, outputMint, amount: capped, taker: BOT, slippageBps: "pendiente" });
   if (swap.side === "buy") {
@@ -59,8 +64,11 @@ async function onTraderTx(tx) {
     if (exceedsCap(q, swap)) return skip(key, "omitida: precio");
     slippageBps = maxSlippageWithinCap(q, swap);           // floor; si < mínimo operable → skip
   }
-  // re-pedir /build con el slippage final si cambió; armar tx + tip; simular; CU×1.2; fee con tope
-  const signed = signOnce(tx);                              // firma = id
+  // re-pedir /build con el slippage final si cambió. OJO: es una cotización NUEVA → repite el chequeo del tope
+  // contra q2.otherAmountThreshold (salida mínima que exige la tx): si
+  //   q2.inAmount × traderTok × 10000  >  traderSol × q2.otherAmountThreshold × (10000+capBps)  → skip "omitida: precio"
+  // armar botTx (instrucciones de q2 + tip); simular; CU×1.2; fee con tope
+  const signed = signOnce(botTx);                           // la tx del BOT (no la del trader); firma = id
   update(key, { status: "sent", bot_sig: sigOf(signed), last_valid_bh });
   await sendAndRebroadcast(signed, last_valid_bh);         // mismo tx, sin re-firmar
   const st = await confirm(sigOf(signed));                 // confirmed + revisar err

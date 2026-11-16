@@ -51,8 +51,8 @@ Parámetros opcionales y el efecto en el ruteo (`receiver` y `payer` desactivan 
 ## Flujo `/build`
 
 1. `GET /swap/v2/build?inputMint&outputMint&amount&taker` + opcionales: `slippageBps` (número o `rtse`), `platformFeeBps` + `feeAccount`, `computeUnitPricePercentile`, `mode=fast`, `maxAccounts`, `maxBytes`, `forJitoBundle`, `tipAmount` (solo para `tx.jup.ag`).
-2. La respuesta trae `computeBudgetInstructions` (solo precio de CU, **no** el límite), `setupInstructions`, `swapInstruction`, `cleanupInstruction`, `otherInstructions`, `addressesByLookupTableAddress`, `blockhashWithMetadata`.
-3. Arma: compute budget → setup → swap → cleanup → tus instrucciones (tip de Sender, cierre de cuentas). Simula, pon límite de CU = consumidas × 1.2 (tope 1 400 000), **acota el precio de CU** (puede venir disparado), compila a v0 con las ALTs, firma, envía.
+2. La respuesta trae la cotización (`inAmount`, `outAmount`, `otherAmountThreshold` = salida mínima tras slippage, que es lo que la tx exige on-chain) y `computeBudgetInstructions` (solo precio de CU, **no** el límite), `setupInstructions`, `swapInstruction`, `cleanupInstruction`, `otherInstructions`, `addressesByLookupTableAddress`, `blockhashWithMetadata`.
+3. Arma en el orden del ejemplo oficial: límite de CU (tuyo) → `computeBudgetInstructions` → `setupInstructions` → `swapInstruction` → tus instrucciones (tip de Sender, memo) → `cleanupInstruction` (si no es `null`) → `otherInstructions` → `tipInstruction` (solo si mandaste `tipAmount`). No omitas `otherInstructions`. Simula, pon límite de CU = consumidas × 1.2 (tope 1 400 000), **acota el precio de CU** (puede venir disparado), compila a v0 con las ALTs, firma, envía.
 4. `/execute` no sirve para `/build`.
 
 ## Cobrar comisión como integrador
@@ -106,7 +106,7 @@ Haz un swap de prueba chico, abre la firma en solscan.io y revisa: que el token 
 - https://developers.jup.ag/docs/llms.txt (índice, keyless 0.5 RPS)
 - https://developers.jup.ag/docs/swap/index.md (caminos, fees por par, FAQ)
 - https://developers.jup.ag/docs/swap/order-and-execute.md (fees, referral, errores, matriz de ruteo)
-- https://developers.jup.ag/docs/swap/build.md y https://developers.jup.ag/docs/api-reference/swap/build.md
+- https://developers.jup.ag/docs/swap/build.md (orden de instrucciones del ejemplo, `/execute` no aplica) y https://developers.jup.ag/docs/api-reference/swap/build.md (`otherAmountThreshold`, parámetros)
 - https://developers.jup.ag/docs/api-reference/swap/order.md (parámetros de `/order`)
 - https://developers.jup.ag/docs/tool-kits/referral-program.md
 - https://developers.jup.ag/docs/portal/rate-limits.md, https://developers.jup.ag/docs/portal/plans.md, https://developers.jup.ag/docs/portal/migration.md (retiro de lite-api)

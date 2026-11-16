@@ -63,7 +63,7 @@ Explica al usuario en 1-2 frases la decisión antes de montarla.
 
 ## Montar un proyecto nuevo (paso a paso)
 
-1. Corre `scripts/revisar-entorno.sh` para ver qué falta.
+1. Corre `bash "${CLAUDE_SKILL_DIR}/scripts/revisar-entorno.sh" <carpeta-del-proyecto>` para ver qué falta (solo lee, no instala nada).
 2. Rokit (gestor de herramientas oficial de Rojo; **Aftman está abandonado**, no lo uses):
    ```bash
    curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash

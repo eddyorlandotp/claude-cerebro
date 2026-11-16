@@ -4,6 +4,8 @@
 # Requiere: rsvg-convert (paquete librsvg) e ImageMagick (magick o convert).
 set -euo pipefail
 SVG="${1:?Uso: exportar_logo.sh logo.svg [salida] [#fondo]}"
+case "$SVG" in -h|--help) sed -n '2,4p' "$0"; exit 0;; esac
+[ -f "$SVG" ] || { echo "No existe el SVG: $SVG" >&2; exit 1; }
 OUT="${2:-marca-export}"
 FONDO="${3:-#ffffff}"
 if command -v magick >/dev/null; then IM=magick; ID="magick identify"   # ImageMagick 7

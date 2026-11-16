@@ -49,7 +49,7 @@ En fish, si `forge` no aparece, abre una terminal nueva o agrega `~/.foundry/bin
 - Versión a nov 2026: OpenZeppelin Contracts **5.7.0**. Instala por tag, no `master`:
   `forge install OpenZeppelin/openzeppelin-contracts@v5.7.0` y en `remappings.txt`:
   `@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/`
-  (la doc avisa que `forge update` puede moverte a `master`, que es desarrollo).
+  (la doc avisa que `forge update` puede moverte a `master`, que es desarrollo). Si el proyecto usa npm en vez de `forge install`: al 16 nov 2026 `npm view @openzeppelin/contracts dist-tags` da `latest` = 5.6.1 y 5.7.0 bajo el tag `dev`; fija la versión exacta y no asumas que `npm install` trae la 5.7.0.
 - No copies ni modifiques código de la librería: hereda o compón. Genera la base con el Contracts Wizard (`docs.openzeppelin.com/contracts/5.x/wizard`) y explícale al usuario cada opción que activaste.
 - Usa: `SafeERC20` (`safeTransfer`, `forceApprove`) para tokens externos; `Ownable2Step` o `AccessControl` para permisos; `Pausable` si hay fondos; `ReentrancyGuardTransient` en cadenas con transient storage (en 5.7.0 `ReentrancyGuard` normal está marcado como deprecado para v6).
 - `pragma solidity` fijo (sin `^`) en contratos a desplegar.
@@ -99,6 +99,6 @@ En el explorador (basescan.org), la pestaña "Contract" debe mostrar código ver
 
 - https://getfoundry.sh/introduction/installation · https://github.com/foundry-rs/foundry/releases (v1.8.6, 21 oct 2026)
 - https://www.getfoundry.sh/llms.txt · https://www.getfoundry.sh/anvil/forking · https://www.getfoundry.sh/reference/cast/wallet/import
-- https://docs.openzeppelin.com/contracts/5.x/ · https://github.com/OpenZeppelin/openzeppelin-contracts/releases (v5.7.0) · `contracts/utils/ReentrancyGuard.sol` y `contracts/token/ERC20/utils/SafeERC20.sol` en el tag v5.7.0
+- https://docs.openzeppelin.com/contracts/5.x/ · https://github.com/OpenZeppelin/openzeppelin-contracts/releases (v5.7.0, marcada Latest) · registro npm `@openzeppelin/contracts` (dist-tags: latest 5.6.1, dev 5.7.0) · `contracts/utils/ReentrancyGuard.sol` y `contracts/token/ERC20/utils/SafeERC20.sol` en el tag v5.7.0
 - https://github.com/crytic/slither (instalación, Python 3.10+)
 - https://github.com/trailofbits/skills (README y `.claude-plugin/marketplace.json`; licencia CC-BY-SA-4.0, solo se mencionan, no se copia texto) · `plugins/building-secure-contracts/README.md`

@@ -131,8 +131,8 @@ No digas "ya quedó corriendo" sin mostrar esto:
 
 1. `systemctl --user is-active mi-bot` → `active` (o `docker compose ps` → `running`/`healthy`).
 2. Que **haga su trabajo**: el log muestra actividad reciente, el puerto responde (`ss -tulpn | grep PUERTO`, `curl -sS localhost:PUERTO/health`), o el archivo/salida esperado existe.
-3. Prueba de resurrección: `systemctl --user kill -s KILL mi-bot` y a los segundos vuelve a `active`. En Docker simula un crash matando el proceso desde el host: `sudo kill -9 (docker inspect -f '{{.State.Pid}}' contenedor)` y revisa que `docker compose ps` lo muestre otra vez arriba (`docker stop` es detención manual y la política de reinicio lo ignora, así que no sirve para esta prueba).
-4. Si es crítico, prueba de reinicio: `sudo reboot` y confirma que arrancó solo (`systemctl --user status`, `loginctl show-user`).
+3. Prueba de resurrección: `systemctl --user kill -s KILL mi-bot` y a los segundos vuelve a `active`. En Docker simula un crash matando el proceso desde el host: `sudo kill -9 $(docker inspect -f '{{.State.Pid}}' contenedor)` (`$(...)` funciona igual en bash y en fish) y revisa que `docker compose ps` lo muestre otra vez arriba (`docker stop` es detención manual y la política de reinicio lo ignora, así que no sirve para esta prueba).
+4. Si es crítico, prueba de reinicio: **pide el "sí" del usuario antes** (reiniciar corta todo lo que esté corriendo, incluida esta sesión si es la misma máquina), luego `sudo reboot` y confirma que arrancó solo (`systemctl --user status`, `loginctl show-user`).
 5. Fallas globales: `systemctl --failed` y `systemctl --user --failed`.
 
 Opcional para que el usuario se entere si algo cae: `OnFailure=` apuntando a un servicio que mande notificación (`notify-send`, Telegram, ntfy). Pregunta antes de agregar servicios externos.

@@ -8,17 +8,21 @@
 - Si un marketplace ya existe, `marketplace add` puede fallar: está bien, sigue.
 - Si un `install` falla, reinténtalo **una** vez. Si vuelve a fallar, anótalo y sigue con los demás; no te detengas.
 - No instales nada que no esté en esta lista. No cambies la configuración del usuario fuera de esto.
-- Pregunta solo una cosa al inicio (ver paso 0). Todo lo demás hazlo sin preguntar.
+- Pregunta solo lo del paso 0. Todo lo demás hazlo sin preguntar, salvo donde un paso diga que necesitas el "sí" del usuario.
 
-## Paso 0: pregunta el perfil
+## Paso 0: dos preguntas antes de empezar
 
-Pregunta al usuario, en una sola pregunta:
+Hazlas juntas, en un solo mensaje. Si el usuario ya contestó alguna en su mensaje, no la repitas.
 
-- **Completo (recomendado):** todo lo de los pasos 1 a 4.
-- **Completo + ECC:** lo anterior más Everything Claude Code (paso 5). Avísale en una línea que ECC agrega 314 skills, 71 agentes y 27 hooks que se activan en cada acción, y que se encima con Superpowers.
-- **Solo cerebro:** únicamente el paso 1.
+**1. Perfil**
 
-Si ya dijo cuál quiere en su mensaje, no preguntes.
+| Perfil | Pasos que corres |
+|---|---|
+| **Completo (recomendado)** | 1, 2, 2b, 3, 4, 5b (solo si dijo que sí a RTK), 6 y 7 |
+| **Completo + ECC** | los de Completo más el paso 5. Avísale en una línea que ECC agrega 314 skills, 71 agentes y 27 hooks que se activan en cada acción, y que se encima con Superpowers |
+| **Solo cerebro** | 1, 6 y 7 |
+
+**2. ¿Instalo RTK?** Es un programa de terceros (github.com/rtk-ai/rtk, código abierto) que comprime la salida de los comandos para gastar menos tokens. Se instala con un script que se descarga de internet y se ejecuta en su máquina, así que **necesitas su "sí" explícito**. Si no contesta o dice que no, sáltate el paso 5b.
 
 ## Paso 1: plugins propios (marketplace `cerebro`)
 
@@ -113,7 +117,7 @@ claude plugin marketplace add affaan-m/ECC
 claude plugin install ecc@ecc
 ```
 
-## Paso 5b: ahorro de tokens (perfiles "Completo" y "Completo + ECC")
+## Paso 5b: RTK (solo si el usuario dijo que sí en el paso 0)
 
 **RTK (Rust Token Killer)** comprime la salida de los comandos (git, tests, builds, ls) antes de que llegue al contexto, sin cambiar cómo piensa Claude. Instálalo así:
 
@@ -124,7 +128,7 @@ claude plugin install ecc@ecc
    rtk --version && rtk gain
    ```
    Si el binario quedó en `~/.local/bin` y no está en el PATH, díselo al usuario con el comando para fish: `fish_add_path ~/.local/bin`.
-3. Lee `rtk init --help` y conéctalo a Claude Code **solo con el hook** (sin proxy ni daemon), de forma no interactiva (busca opciones como `-g --hook-only` / `--auto-patch`). Confirma con `rtk init --show`.
+3. Conéctalo a Claude Code **solo con el hook**, sin proxy ni daemon. Primero corre `rtk init --help` para confirmar que existen estas opciones y luego `rtk init -g --hook-only --auto-patch`. Si alguna opción ya no existe o el comando pide instalar un proxy o un servicio, detente y pregúntale al usuario. Confirma con `rtk init --show`.
 4. Dile al usuario que reinicie Claude Code para activarlo y que `rtk gain` muestra cuánto va ahorrando.
 
 **No instales Caveman** ni ningún plugin de "respuestas telegráficas", en ningún perfil: el usuario decidió dejarlo fuera porque necesita explicaciones claras, y lo que más gasta tokens es lo que Claude lee, no lo que escribe.
@@ -150,4 +154,4 @@ sudo pacman -S --needed typescript-language-server pyright nodejs npm ffmpeg git
 
 ## Para actualizar más adelante
 
-Si el usuario pide "actualiza el cerebro": corre `claude plugin marketplace update` y luego `claude plugin update <nombre>@<marketplace>` para cada plugin instalado (sácalos de `claude plugin list`). Si este archivo agregó plugins nuevos desde la última vez, instálalos también. Termina pidiendo `/reload-plugins`.
+Si el usuario pide "actualiza el cerebro": corre `claude plugin marketplace update` y luego `claude plugin update <nombre>@<marketplace>` para cada plugin instalado (sácalos de `claude plugin list`). Si este archivo agregó plugins nuevos desde la última vez, instálalos también. Termina pidiéndole al usuario que **reinicie Claude Code** (después de `plugin update` no basta con `/reload-plugins`).

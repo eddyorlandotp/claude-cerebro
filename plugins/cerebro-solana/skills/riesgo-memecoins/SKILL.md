@@ -73,7 +73,7 @@ Nunca conviertas un error de API en `ok`: usa `sin_datos`.
 | Jupiter Tokens v2 / Price v3 | Metadata, `decimals`, `tokenProgram`, `isVerified`, `organicScore`, `audit` (mint/freeze deshabilitada, top holders, `isSus`); precio USD y liquidez | Sí, keyless 0.5 RPS; llave Free 1 RPS | Comparten bucket con swaps |
 | RugCheck (`api.rugcheck.xyz`) | Reporte completo y resumen de riesgo, insiders, metadata | GET de reportes sin llave; bulk y lockers con llave | No documentados en su swagger |
 | DexScreener (`api.dexscreener.com`) | Pares, liquidez, volumen, txns, precio por token | Sí, sin llave | 300 req/min (pares/tokens), 60 req/min (perfiles/boosts) |
-| Birdeye (`X-API-KEY` obligatorio) | Precios, OHLCV, trades, holders, PnL de wallets | Plan Standard: 30 000 CU/mes, 1 rps, solo 3 endpoints | Lite $39/mes 15 rps; websockets desde Premium |
+| Birdeye (`X-API-KEY` obligatorio) | Precios, OHLCV, trades, holders, PnL de wallets | Plan Standard: 30 000 CU/mes, 1 rps, acceso "Limited" (la doc se contradice sobre cuántos endpoints: verificar en https://data.birdeye.so/docs/guides/data-accessibility-by-packages.md antes de depender de esto) | Lite $39/mes 15 rps; websockets desde Premium |
 | GeckoTerminal / CoinGecko onchain | Pools, OHLCV, trades | La página de GeckoTerminal indica 30 llamadas/min gratis; pagando sube a 500 | Usa endpoints `/onchain` de CoinGecko con llave |
 
 ## Cómo comprobarlo tú mismo
@@ -87,7 +87,7 @@ Toma un token que sepas que es legítimo (USDC) y uno recién lanzado; corre los
 - https://developers.jup.ag/docs/tokens/index.md , https://developers.jup.ag/docs/price/index.md , https://developers.jup.ag/docs/portal/rate-limits.md
 - https://api.rugcheck.xyz/swagger/doc.json
 - https://docs.dexscreener.com/api/reference
-- https://data.birdeye.so/docs/guides/payment/pricing.md , https://data.birdeye.so/docs/guides/api-access/rate-limiting/index.md
+- https://data.birdeye.so/docs/guides/payment/pricing.md , https://data.birdeye.so/docs/guides/api-access/rate-limiting/index.md , https://data.birdeye.so/docs/guides/data-accessibility-by-packages.md
 - https://www.geckoterminal.com/dex-api , https://docs.coingecko.com/docs/errors-and-rate-limits.md
 - https://github.com/pump-fun/pump-public-docs (PUMP_PROGRAM_README.md, PUMP_SWAP_README.md, SYNTHETIC_MIGRATION.md)
 - https://www.helius.dev/docs/llms.txt (Wallet API: identidades y fuentes de fondeo)

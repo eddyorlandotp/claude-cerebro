@@ -114,7 +114,7 @@ No edites `hyprland.lua`, `modules/*.lua`, `monitors.lua` ni `gpu.lua` (los gene
 
 ## 8. Cómo hablarle al usuario
 
-No programa. Antes de algo que toque el sistema, explica en 1–2 frases qué vas a hacer y si es reversible (hay snapshot). Al terminar, dale **un** comando para comprobarlo él mismo y qué debería ver.
+No programa. Antes de algo que toque el sistema, explica en 1–2 frases qué vas a hacer y si es reversible (hay snapshot). Para `pacman -Syu`, kernel, drivers NVIDIA, bootloader, rollback de snapshots o reinicios, espera su "sí" explícito; lo que pida contraseña de sudo dáselo como comando para que lo corra él. Al terminar, dale **un** comando para comprobarlo él mismo y qué debería ver.
 
 ## Verifica antes de confiar
 

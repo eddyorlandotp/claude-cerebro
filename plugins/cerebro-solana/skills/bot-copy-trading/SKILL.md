@@ -61,16 +61,16 @@ Usa cambios de balance, no decodificación de instrucciones (funciona con cualqu
 
 - Compra: `tamaño = pct × (SOL del bot − reserva)`. La reserva cubre fees, tips, rent de ATAs y las ventas futuras (configurable; muestra al usuario de cuánto es y por qué).
 - Venta: vende `pct × posición actual del bot en ese mint`. Si el trader vendió 100%, vende 100% y cierra la token account para recuperar el rent.
-- Aplica topes: mínimo (si da menos que el mínimo útil, registra "omitida: monto muy chico") y máximo por operación.
+- Aplica topes: mínimo (si da menos que el mínimo útil, registra "omitida: monto muy chico") y máximo por operación. El máximo por operación está en SOL (lamports) y aplica a **compras**; no lo compares contra una cantidad de tokens de una venta (unidades distintas: recortaría la venta y el bot se quedaría con tokens que el trader ya vendió).
 - Todo en `BigInt` con redondeo hacia abajo (nunca gastar más de lo calculado).
 
 ## 4. Validaciones (solo las que el usuario pidió)
 
 - **Tope de precio de entrada**: con la cotización de `/build`, precio del bot = `inAmount / outAmount`. Si `precioBot > precioTrader × (1 + topeBps/10 000)` → no compres, registra "omitida: precio" con ambos precios. Compara multiplicando en cruz con `BigInt`, sin dividir.
-- **Slippage alineado al tope**: elige `slippageBps` para que el peor caso tampoco pase el tope: `slippage ≤ 1 − precioCotizado / precioTope`. Si ese margen es menor al mínimo operable, omite. Así el tope se respeta también al ejecutar, no solo al cotizar.
+- **Slippage alineado al tope**: elige `slippageBps` para que el peor caso tampoco pase el tope: `slippage ≤ 1 − precioCotizado / precioTope`. Si ese margen es menor al mínimo operable, omite. Así el tope se respeta también al ejecutar, no solo al cotizar. Cada llamada a `/build` es una cotización nueva: valida el tope contra la respuesta que **de verdad vas a firmar**, usando su `otherAmountThreshold` (salida mínima tras slippage): `inAmount × tokensTrader × 10 000 ≤ solTrader × otherAmountThreshold × (10 000 + topeBps)`. Si no se cumple, omite.
 - **Saldo mínimo**: si el SOL del bot menos la reserva no alcanza, omite y alerta "saldo bajo".
 - **Ventas**: no apliques tope de precio a ventas salvo que el usuario lo pida (copiar fiel = salir cuando sale el trader).
-- Límites duros (máximo por operación, pérdida diaria, operaciones por hora).
+- Límites duros (máximo por operación, pérdida diaria, operaciones por hora). Por defecto la pausa y los límites frenan solo las **compras**; las ventas se siguen copiando, porque frenarlas deja posiciones abiertas que el trader ya cerró. Solo frena también las ventas si el usuario lo pide de forma explícita, y déjalo como configuración visible.
 
 ## 5. Envío
 
@@ -114,7 +114,7 @@ En modo observación, deja correr un día y revisa el registro: ¿cada compra/ve
 ## Fuentes (verificado nov 2026)
 
 - https://www.helius.dev/docs/rpc/websocket/transaction-subscribe.md , https://www.helius.dev/docs/rpc/websocket.md
-- https://developers.jup.ag/docs/swap/build.md , https://developers.jup.ag/docs/swap/index.md (fees por par, 50 bps en tokens < 24 h)
+- https://developers.jup.ag/docs/swap/build.md , https://developers.jup.ag/docs/api-reference/swap/build.md (`otherAmountThreshold`), https://developers.jup.ag/docs/swap/index.md (fees por par, 50 bps en tokens < 24 h)
 - https://www.helius.dev/docs/sending-transactions/sender.md
 - https://raw.githubusercontent.com/pump-fun/pump-public-docs/main/docs/PUMP_PROGRAM_README.md y .../SYNTHETIC_MIGRATION.md (`complete`, `BondingCurveComplete`, migración a PumpSwap)
 - https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/

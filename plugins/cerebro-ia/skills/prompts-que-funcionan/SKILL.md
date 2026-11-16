@@ -14,7 +14,7 @@ Sirve para dos cosas: (A) cuando Claude escribe instrucciones para otro modelo (
 
 ## 1. Las 6 piezas de un buen prompt
 
-1. **Rol y situación** en una o dos frases: quién es, para quién trabaja, qué canal ("Atiendes por WhatsApp a clientes de una taquería en San Luis Potosí").
+1. **Rol y situación** en una o dos frases: quién es, para quién trabaja, qué canal ("Atiendes por WhatsApp a clientes de una taquería").
 2. **Contexto y el porqué**: la doc oficial muestra que explicar la razón funciona mejor que la orden sola. No "NUNCA uses puntos suspensivos", sino "tu respuesta se lee con voz sintética, así que no uses puntos suspensivos porque no sabe pronunciarlos". El modelo generaliza a partir de la razón.
 3. **Tarea concreta y pasos**: lista numerada cuando el orden o la completitud importan.
 4. **Datos de entrada separados con etiquetas XML** (`<menu>`, `<politicas>`, `<mensaje_cliente>`). Documentos largos **arriba**, la pregunta e instrucciones **al final**: la doc reporta hasta 30% mejor calidad con la consulta al final en entradas largas.

@@ -23,7 +23,7 @@ Explícale al usuario la elección en 1–2 frases antes de comprar nada.
 - **Con Home Assistant OS**: app **ESPHome Device Builder** (Ajustes > Apps). Las configuraciones quedan en `/config/esphome/`.
 - **En la PC con Arch/CachyOS**:
   - CLI: `sudo pacman -S esphome` (está en `extra`; a nov 2026 versión 2026.10.x).
-  - App de escritorio (AUR): `paru -S esphome-desktop-bin`.
+  - App de escritorio (AUR, no oficial): `yay -S esphome-desktop-bin` o `paru -S esphome-desktop-bin`, según el helper que haya (`command -v yay paru`; ver `cachyos-hyprland-fish` de cerebro-linux). Sin sudo.
   - **No uses `pip install` en el Python del sistema**: Arch lo bloquea (`externally-managed-environment`).
 - **Docker**: imagen `ghcr.io/esphome/esphome` con `--net=host` (sin host networking no hay mDNS y solo encuentra dispositivos con IP fija). Panel en `http://localhost:6052`.
 

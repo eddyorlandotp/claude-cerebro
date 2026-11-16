@@ -16,7 +16,8 @@ https://www.helius.dev/docs/billing/plans.md , https://www.helius.dev/docs/billi
 | LaserStream WSS métodos estándar | Incluido | Incluido | Incluido | Incluido |
 | LaserStream WSS extensiones (`transactionSubscribe`) | — | Incluido | Incluido | Incluido |
 | LaserStream gRPC | — | Devnet | Devnet + Mainnet | Devnet + Mainnet |
-| Preconfirmations | — | 10 créditos/msg | igual | igual |
+| Preconfirmations | — | 10 créditos/msg (mínimo 300 créditos por slot con ≥1 mensaje, por suscripción) | igual | igual |
+| Preprocessed (`preprocessedSubscribe`, beta) | — | 0.1 créditos/msg | igual | igual |
 | Soporte | Comunidad | Chat | Chat prioritario | Slack/Telegram |
 
 Autoscaling de créditos está activo por defecto en Business y Professional (cobra extra al acabarse los créditos). En Free y Developer el servicio se corta: alerta antes.

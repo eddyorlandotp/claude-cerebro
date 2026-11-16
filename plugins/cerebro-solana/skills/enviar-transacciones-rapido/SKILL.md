@@ -51,7 +51,7 @@ Tips mínimos, endpoints y cuentas de tip cambian (Sender subió su tip mínimo 
 
 ## Jito directo (si no usas Sender)
 
-- Block engine: `https://mainnet.block-engine.jito.wtf` (+ regionales `ny.`, `slc.`, `frankfurt.`, `amsterdam.`, `london.`, `dublin.`, `singapore.`, `tokyo.`). Rutas: `/api/v1/transactions` (sendTransaction) y `/api/v1/bundles` (sendBundle, getBundleStatuses, getTipAccounts, getInflightBundleStatuses).
+- Block engine: `https://mainnet.block-engine.jito.wtf` (+ regionales `ny.`, `slc.`, `frankfurt.`, `amsterdam.`, `london.`, `dublin.`, `singapore.`, `tokyo.`). Rutas (a nov 2026, según los ejemplos de la doc): `/api/v1/transactions` (sendTransaction), `/api/v1/bundles` (sendBundle), y cada consulta en su propia ruta: `/api/v1/getBundleStatuses`, `/api/v1/getTipAccounts`, `/api/v1/getInflightBundleStatuses`.
 - Bundles: hasta 5 tx, secuenciales y atómicas (todo o nada). Tip mínimo 1 000 lamports, a una de las 8 cuentas de tip (`getTipAccounts`). El mínimo casi nunca basta en competencia: consulta el tip floor (https://explorer.jito.wtf/tip-floor).
 - `sendTransaction` de Jito siempre hace `skip_preflight=true`; con `?bundleOnly=true` va como bundle de 1 tx (protección de revert). Para sendTransaction recomiendan repartir 70% priority fee / 30% tip.
 - Tips solo sirven con líderes Jito-Solana. No pongas cuentas de tip en una ALT.
@@ -88,7 +88,7 @@ En los logs del bot cada operación debe tener una sola firma confirmada. Busca 
 - https://www.helius.dev/docs/sending-transactions/sender.md , https://www.helius.dev/docs/sending-transactions/sender-max.md , https://www.helius.dev/docs/sending-transactions/sender-swqos-only.md
 - https://www.helius.dev/docs/billing/rate-limits.md (Sender 50/s con llave, 1/s sin llave)
 - https://www.helius.dev/docs/priority-fee-api.md (niveles, estimación por tx vs global, advertencia UnsafeMax)
-- https://docs.jito.wtf/lowlatencytxnsend/ (endpoints, bundles de 5, tip mínimo 1 000 lamports, 70/30, rate limit)
+- https://docs.jito.wtf/lowlatencytxnsend/ (endpoints y rutas por método, bundles de 5, tip mínimo 1 000 lamports, 8 cuentas de tip, 70/30, rate limit)
 - https://developers.jup.ag/docs/transaction/submit.md , https://developers.jup.ag/docs/swap/advanced/compute-units.md
 - https://solana.com/docs/core/transactions/retry (maxRetries, rebroadcast, cuándo re-firmar)
 - https://solana.com/docs/core/fees (fórmula de priority fee)

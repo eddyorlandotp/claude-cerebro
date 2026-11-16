@@ -92,7 +92,7 @@ Decide con el usuario en 1-2 frases: "¿Quieres un botón propio simple o un mod
 Antes de integrar, lee `references/agregadores-swaps.md` (endpoints, parámetros y trampas verificadas). Lo esencial:
 
 - **0x Swap API v2**: `https://api.0x.org/swap/allowance-holder/quote` (recomendado) con headers `0x-api-key` y `0x-version: v2`. Comisión de integrador con `swapFeeRecipient` + `swapFeeBps` (máx. 1000 bps por defecto) + `swapFeeToken`, disponible en todos los planes. **Nunca aprobar al contrato Settler**: solo al spender que devuelve `issues.allowance.spender`.
-- **1inch**: `https://api.1inch.com/swap/v6.1/{chainId}/...`, API key como Bearer. Ojo: en el plan gratis Dev, los parámetros `fee` + `referrer` se **ignoran en silencio** (el swap sale, tú no cobras). Cobrar comisión requiere plan de pago.
+- **1inch**: `https://api.1inch.com/swap/v6.1/{chainId}/...`, API key como Bearer. Ojo: en el plan gratis Dev, los parámetros `fee` + `referrer` se **ignoran en silencio** (el swap sale, tú no cobras). Cobrar comisión requiere plan de pago. Además 1inch descuenta su propio fee de infraestructura del monto de destino (plan Dev: 10 bps stables / 30 bps resto, a nov 2026).
 - Flujo seguro: precio indicativo → cotización firme con `taker` → revisar `minBuyAmount`/salida mínima y fees → approve exacto si falta → simular → confirmación del usuario → enviar → esperar recibo → verificar saldos.
 
 ## Errores comunes que debes evitar
@@ -117,6 +117,6 @@ Después de un swap o transferencia de prueba en Base Sepolia, abre la tx en sep
 - https://viem.sh/docs/introduction · https://wagmi.sh/react/getting-started · https://wagmi.sh/react/guides/connect-wallet · https://wagmi.sh/react/guides/migrate-from-v2-to-v3
 - https://docs.ethers.org/v6/ · registry.npmjs.org (versiones y peerDependencies de viem, wagmi, ethers, connectkit, @rainbow-me/rainbowkit, @reown/appkit-adapter-wagmi, @coinbase/onchainkit)
 - https://docs.0x.org/evm/0x-swap-api/guides/swap-tokens-with-0x-swap-api · https://docs.0x.org/evm/0x-swap-api/guides/monetize-your-app-using-swap
-- https://business.1inch.com/products/swap · https://business.1inch.com/portal/llms-full.txt (fees de integrador requieren plan de pago)
+- https://business.1inch.com/products/swap · https://business.1inch.com/portal/llms-full.txt (fees de integrador requieren plan de pago; plan Dev 1 RPS y 100 000 llamadas/mes; fee de infraestructura por plan)
 - https://developers.circle.com/stablecoins/usdc-contract-addresses · OpenZeppelin `SafeERC20.sol` (forceApprove)
 - https://ethereum.org/developers/docs/gas/

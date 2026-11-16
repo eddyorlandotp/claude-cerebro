@@ -101,7 +101,7 @@ qué vender y cómo cobrarlo.
 | Formulario → Google Sheets → aviso por correo/Telegram | Google Apps Script o Cloudflare Worker | Pide acceso con cuenta del cliente, no la tuya |
 | Bot de Telegram para pedidos/FAQ | Telegram Bot API (gratis) + Worker | Fácil de probar en vivo con el cliente |
 | Chatbot FAQ en la web del negocio | Widget + API de un LLM con la info del negocio | API key del cliente, límite de gasto, que diga "no sé" en vez de inventar |
-| Bot de WhatsApp oficial | WhatsApp Business Platform (Cloud API de Meta) | Cobro **por mensaje** desde jul 2025; respuestas dentro de 24 h a quien escribió son gratis; plantillas de marketing se cobran. Verifica tarifas MXN. **Nunca** librerías no oficiales (banean el número) |
+| Bot de WhatsApp oficial | WhatsApp Business Platform (Cloud API de Meta) | Cobro **por mensaje** desde jul 2025. Desde el 1 oct 2026 las respuestas dentro de la ventana de 24 h (mensajes de servicio) solo son gratis las primeras 1,000 al mes por número; después se cobran y sin método de pago dejan de entregarse. Las plantillas se cobran siempre. Detalle y tarifas: skill `chatbots-whatsapp-telegram` de `cerebro-ia`; verifica el rate card de Meta antes de cotizar. **Nunca** librerías no oficiales (banean el número) |
 | Reporte automático semanal (ventas, inventario) | Script + Sheets/CSV → PDF/correo | Datos de prueba primero |
 | Landing + lista de espera | Ver skill `landing-que-convierte` (cerebro-web) si está instalada | — |
 

@@ -11,13 +11,13 @@ Lee esto antes de escribir o revisar código que lea cuentas, construya transacc
 
 - Antes de escribir código contra una API o librería, confírmala en la doc oficial: usa el MCP `solana` de este plugin (`plugin:cerebro-solana:solana`, doc oficial de Solana y Anchor), o Context7 (MCP `context7`) si está instalado, o WebFetch a solana.com/docs. No escribas firmas de funciones de memoria.
 - Antes de instalar algo, revisa `package.json` del proyecto y la versión publicada: `npm view <paquete> version`.
-- Al usuario explícale en 1–3 frases qué vas a usar y por qué ("Uso @solana/kit porque es el SDK que Solana recomienda hoy y el que usa helius-sdk").
+- Al usuario explícale en 1–3 frases qué vas a usar y por qué ("Uso @solana/kit porque es el SDK que Solana recomienda hoy").
 
 ## Qué SDK usar (a nov 2026, verifica con `npm view` antes de instalar)
 
 | Situación | Usa | Notas |
 | - | - | - |
-| Proyecto nuevo (Worker, backend, frontend) | `@solana/kit` (latest 8.x) + `@solana-program/system`, `@solana-program/token`, `@solana-program/token-2022`, `@solana-program/compute-budget` | Solana lo marca como el SDK recomendado. `helius-sdk` 3.x declara `@solana/kit` como peer. |
+| Proyecto nuevo (Worker, backend, frontend) | `@solana/kit` (latest 8.x) + `@solana-program/system`, `@solana-program/token`, `@solana-program/token-2022`, `@solana-program/compute-budget` | Solana lo marca como el SDK recomendado. Ojo: `helius-sdk` 3.5.0 declara como peer `@solana/kit ^6.9.0` (no 8.x) y `@solana-program/token ^0.13.0`; con Kit 8 `npm install` puede fallar por peers. Revisa `npm view helius-sdk peerDependencies` antes de combinarlos; para RPC, WebSocket y Sender basta `fetch`/`WebSocket` sin ese SDK. |
 | Proyecto existente con estilo `Connection`/`Keypair` | `@solana/web3.js` v3 | Es la versión recomendada de web3.js; usa internals de Kit. NO es drop-in: varios métodos que eran síncronos ahora son `async` (p. ej. `Keypair.generate()`, `transaction.sign()`). |
 | Código viejo en web3.js 1.x | Déjalo funcionar, no agregues features nuevas encima | 1.x está en modo mantenimiento (solo fixes críticos). |
 | Tokens con web3.js v3 o Kit | `@solana-program/token` / `@solana-program/token-2022` | `@solana/spl-token` depende de web3.js 1.x y no corre en v3. |
@@ -120,4 +120,4 @@ Pídele a Claude que corra `npm ls @solana/kit @solana/web3.js` para ver qué SD
 - https://developers.jup.ag/docs/swap/advanced/transaction-versions.md (v1 en mainnet) y https://developers.jup.ag/docs/swap/advanced/compute-units.md (CU × 1.2)
 - https://docs.phantom.com/sdks/react-sdk/sign-and-send-transaction (versiones mínimas para construir v1)
 - https://www.helius.dev/docs/rpc/websocket/transaction-subscribe.md (`maxSupportedTransactionVersion: 1`)
-- Registro npm (`npm view`) para versiones; RPC mainnet `getMinimumBalanceForRentExemption` y `getAccountInfo` para rent e IDs de programas.
+- Registro npm (`npm view`) para versiones y peers (16 nov 2026: `@solana/web3.js` latest 3.2.1, `@solana/kit` 8.6.0, `helius-sdk` 3.5.0 con peer `@solana/kit ^6.9.0`, `@solana/spl-token` 0.4.15 con peer web3.js `^1.95.5`); RPC mainnet `getMinimumBalanceForRentExemption` y `getAccountInfo` para rent e IDs de programas.
