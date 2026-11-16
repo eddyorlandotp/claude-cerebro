@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-casa",
+  "description": "Casa inteligente: Home Assistant, ESPHome y dispositivos IoT, servidor multimedia con Jellyfin y red Wi-Fi doméstica.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eddy Quiroz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "espanol"
+  ]
+}

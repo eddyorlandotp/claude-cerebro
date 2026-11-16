@@ -1,0 +1,26 @@
+patron,categoria,ambito
+# Copia este archivo a la carpeta de finanzas del usuario y ajustalo. Gana la primera regla que coincida.
+# patron = expresion regular sin mayusculas ni acentos que se busca en la descripcion del banco.
+# ambito = personal | negocio | transferencia (movimientos entre cuentas propias; no son gasto real)
+traspaso entre cuentas|transferencia propia|entre mis cuentas,traspaso propio,transferencia
+pago (de )?tarjeta|pago tdc|pago a tarjeta,pago de tarjeta,transferencia
+cloudflare|github|vercel|netlify|anthropic|openai|namecheap|porkbun|hostinger|google \*?workspace|helius,herramientas y hosting,negocio
+canva|capcut|adobe|figma,herramientas de diseno,negocio
+roblox|steam|playstation|xbox|nintendo|epic games,videojuegos,personal
+netflix|spotify|disney|hbo|max\b|prime video|youtube|crunchyroll|apple\.com,suscripciones,personal
+uber eats|rappi|didi food|didifood,comida a domicilio,personal
+\buber\b|didi|cabify|indrive,transporte,personal
+pemex|gasolin|oxxo gas|g500|shell|bp\b,gasolina,personal
+oxxo|7 ?eleven|seven eleven|circle k|extra\b,tiendita,personal
+walmart|bodega aurrera|soriana|chedraui|la comer|heb|costco|sams|city market,super,personal
+mercado ?libre|amazon|shein|temu|aliexpress,compras en linea,personal
+cfe|agua|interapas|megacable|totalplay|izzi|telmex|infinitum,servicios de casa,personal
+telcel|at&t|att\b|movistar|bait|virgin mobile,celular,personal
+farmacia|benavides|similares|guadalajara|del ahorro,salud,personal
+colegiatura|inscripcion|papeleria|libreria,escuela,personal
+cine|cinepolis|cinemex,salidas,personal
+binance|bitso|coinbase|kraken|okx|bybit|phantom|moonpay,cripto y trading,personal
+comision|anualidad|iva comision|intereses? (ordinarios|moratorios),comisiones e intereses,personal
+retiro (en )?cajero|disposicion efectivo|atm,efectivo,personal
+nomina|sueldo|pago de nomina,sueldo,personal
+spei recibido|deposito|transferencia recibida,ingreso por transferencia,sin definir

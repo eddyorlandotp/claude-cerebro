@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-linux",
+  "description": "CachyOS/Hyprland/fish, servicios 24/7 con systemd y Docker, home lab y red, servidor de Minecraft Bedrock y respaldos.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eddy Quiroz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "espanol"
+  ]
+}

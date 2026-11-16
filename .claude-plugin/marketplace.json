@@ -1,0 +1,74 @@
+{
+  "name": "cerebro",
+  "description": "Skills, agentes y hooks en español para que Claude Code planee, investigue y verifique mejor: Solana, web, juegos, Linux y negocio.",
+  "owner": {
+    "name": "Eddy Quiroz"
+  },
+  "plugins": [
+    {
+      "name": "cerebro-base",
+      "source": "./plugins/cerebro-base",
+      "description": "Método de trabajo: modo mentor, memoria en Obsidian, git como red de seguridad, protección de secretos, investigar antes de codear, deploy y cierre de sesión."
+    },
+    {
+      "name": "cerebro-solana",
+      "source": "./plugins/cerebro-solana",
+      "description": "Solana, Jupiter, Helius, envío rápido de transacciones, copy trading, riesgo de memecoins, montos y decimales, billeteras sin custodia."
+    },
+    {
+      "name": "cerebro-web",
+      "source": "./plugins/cerebro-web",
+      "description": "Cloudflare Tunnel y plan gratis, bases de datos, cobros y suscripciones, SEO técnico y landings que convierten."
+    },
+    {
+      "name": "cerebro-juegos",
+      "source": "./plugins/cerebro-juegos",
+      "description": "Roblox en Linux con Rojo, arquitectura Luau, anti-exploit, datos y monetización, diseño de juegos, Godot y Steam."
+    },
+    {
+      "name": "cerebro-linux",
+      "source": "./plugins/cerebro-linux",
+      "description": "CachyOS/Hyprland/fish, servicios 24/7, home lab y red, servidor de Minecraft Bedrock y respaldos."
+    },
+    {
+      "name": "cerebro-negocio",
+      "source": "./plugins/cerebro-negocio",
+      "description": "Contenido para redes, clipping y video con ffmpeg, copy en español MX, propuestas freelance y validación de ideas."
+    },
+    {
+      "name": "cerebro-diseno",
+      "source": "./plugins/cerebro-diseno",
+      "description": "Diseño: modelos low-poly en Blender para Roblox, UI/UX, branding y logos, miniaturas y gráficos, edición de imágenes por terminal."
+    },
+    {
+      "name": "cerebro-ia",
+      "source": "./plugins/cerebro-ia",
+      "description": "Apps con IA: Claude API y agentes, chatbots de WhatsApp/Telegram, RAG, automatizaciones con n8n, MCP propios, prompts, modelos locales y ML de series de tiempo."
+    },
+    {
+      "name": "cerebro-vida",
+      "source": "./plugins/cerebro-vida",
+      "description": "Vida y trabajo: CV y entrevistas, aprender y estudiar, finanzas personales básicas, trámites en México, seguridad de cuentas y productividad."
+    },
+    {
+      "name": "cerebro-casa",
+      "source": "./plugins/cerebro-casa",
+      "description": "Casa inteligente: Home Assistant, ESPHome y dispositivos IoT, servidor multimedia con Jellyfin y red Wi-Fi doméstica."
+    },
+    {
+      "name": "cerebro-codigo",
+      "source": "./plugins/cerebro-codigo",
+      "description": "Programación general: TypeScript/Node, Python con uv, React/Next.js, APIs y webhooks, testing, Docker y GitHub Actions, rendimiento y refactors seguros."
+    },
+    {
+      "name": "cerebro-cripto",
+      "source": "./plugins/cerebro-cripto",
+      "description": "Cripto más allá de Solana: EVM/Base y Solidity básico, análisis on-chain, conceptos DeFi y seguridad cripto personal."
+    },
+    {
+      "name": "cerebro-apps",
+      "source": "./plugins/cerebro-apps",
+      "description": "Apps móviles con Expo, PWA, publicar en tiendas, extensiones de Chrome, apps de escritorio con Tauri y bots de Discord."
+    }
+  ]
+}

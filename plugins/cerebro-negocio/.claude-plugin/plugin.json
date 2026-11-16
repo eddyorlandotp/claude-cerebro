@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-negocio",
+  "description": "Contenido para redes, clipping y video con ffmpeg, copy en español MX, propuestas freelance y validación de ideas.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eddy Quiroz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "espanol"
+  ]
+}

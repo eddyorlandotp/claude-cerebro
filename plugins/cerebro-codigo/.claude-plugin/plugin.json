@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-codigo",
+  "description": "Programación general: TypeScript/Node, Python con uv, React/Next.js, APIs y webhooks, testing, Docker y GitHub Actions, rendimiento y refactors seguros.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eddy Quiroz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "espanol"
+  ]
+}

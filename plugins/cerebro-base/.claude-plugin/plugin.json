@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-base",
+  "description": "Método de trabajo: modo mentor, memoria en Obsidian, red de seguridad con git, protección de secretos, investigar antes de codear, deploy y cierre de sesión.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eddy Quiroz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "espanol"
+  ]
+}

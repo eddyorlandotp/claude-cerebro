@@ -1,0 +1,13 @@
+# Config de gitleaks para proyectos con Solana.
+# Copia este archivo a la raíz del repo como .gitleaks.toml
+# Probado con gitleaks 8.30.1 (nov 2026): las reglas por defecto NO detectan
+# keypairs en formato arreglo JSON; esta regla extra sí (una línea o varias).
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "solana-keypair-array"
+description = "Arreglo JSON de 64 numeros (keypair de Solana: 32 bytes privados + 32 publicos)"
+regex = '''\[\s*(?:\d{1,3}\s*,\s*){63}\d{1,3}\s*\]'''
+keywords = [","]
