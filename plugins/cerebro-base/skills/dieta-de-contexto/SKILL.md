@@ -19,7 +19,7 @@ Objetivo: que en cada proyecto solo estén encendidos los plugins que sirven ah�
 2. **Entender el proyecto.** Mira la carpeta actual (README, `package.json`, `pyproject.toml`, `default.project.json`, `wrangler.toml`, extensiones de archivos) y el CLAUDE.md si existe. Resume en una línea de qué trata.
 
 3. **Proponer.** Arma una tabla con tres grupos:
-   - **Mantener siempre:** `cerebro-base`, `superpowers`, `context7`, y los de seguridad si hay código (`security-guidance`, Trail of Bits).
+   - **Mantener siempre:** `cerebro-guardia`, `cerebro-base`, `superpowers`, `context7`, y los de seguridad si hay código (`security-guidance`, Trail of Bits).
    - **Mantener por este proyecto:** los del tema (p. ej. en un juego de Roblox: `cerebro-juegos`, `cerebro-diseno`; en el bot: `cerebro-solana`, `cerebro-web`, `cloudflare`).
    - **Apagar aquí:** el resto, con el ahorro estimado de cada uno.
    - **Prender aquí:** plugins instalados pero apagados que este proyecto sí necesita. Míralos con `claude plugin list` (los que salen deshabilitados): `expo`, `vercel`, `netlify-skills`, `supabase`, `stripe`, `mercadopago`, `plugin-dev`, `pr-review-toolkit`, `chrome-devtools-mcp`, `building-secure-contracts`. Ejemplo: si hay `app.json` de Expo, prende `expo`; si hay `supabase/`, prende `supabase`.
@@ -41,6 +41,6 @@ Objetivo: que en cada proyecto solo estén encendidos los plugins que sirven ah�
 
 ## Reglas
 
-- Nunca apagues `cerebro-base` (trae el hook guardián de secretos) ni plugins de seguridad sin que el usuario lo pida explícitamente.
+- Nunca apagues `cerebro-guardia` (el hook guardián de secretos, no gasta contexto) ni plugins de seguridad sin que el usuario lo pida explícitamente.
 - No uses `--scope user` (afectaría todos los proyectos) salvo que el usuario lo pida.
 - Si dudas si un plugin se usa en el proyecto, déjalo encendido y dilo.

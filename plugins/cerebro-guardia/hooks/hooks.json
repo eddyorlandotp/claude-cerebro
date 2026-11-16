@@ -1,5 +1,5 @@
 {
-  "description": "cerebro-base: guardia contra comandos destructivos y secretos en git (fail-open si no hay python3)",
+  "description": "cerebro-guardia: guardia contra comandos destructivos y secretos en git (fail-open si no hay python3)",
   "hooks": {
     "PreToolUse": [
       {

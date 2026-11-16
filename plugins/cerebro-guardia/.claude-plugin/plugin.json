@@ -1,0 +1,13 @@
+{
+  "name": "cerebro-guardia",
+  "description": "Hook guardián: bloquea commits con .env o llaves privadas y comandos destructivos (rm -rf del sistema, force push a main). No agrega nada al contexto.",
+  "version": "0.1.0",
+  "author": {
+    "name": "eddyorlandotp"
+  },
+  "license": "MIT",
+  "keywords": [
+    "hook",
+    "seguridad"
+  ]
+}

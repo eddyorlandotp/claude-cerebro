@@ -109,7 +109,7 @@ Orden obligatorio (detalle en `secretos-y-llaves`):
    ```
    Requiere git-filter-repo 2.47+ (en Arch/CachyOS: `sudo pacman -S git-filter-repo`). Clones y forks conservan el secreto; GitHub puede tener vistas en caché (soporte de GitHub las borra). Por eso el paso 1 es lo que de verdad protege.
 
-## Hook guardia de este plugin
+## Hook guardia (plugin `cerebro-guardia`)
 
 Bloquea `git add`/`git commit` con `.env`, `.dev.vars`, `id.json`, `*keypair*.json`, `*.pem` o contenido con llaves privadas, y pide confirmación para force-push a main, `reset --hard` y `clean -f`. Si te bloquea: no busques cómo saltarlo; arregla la causa (ignora el archivo, saca la llave) y explica al usuario qué pasó.
 

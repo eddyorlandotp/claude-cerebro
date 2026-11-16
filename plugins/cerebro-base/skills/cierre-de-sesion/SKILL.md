@@ -74,7 +74,7 @@ Cada tarea: verbo + "hecho cuando: <criterio comprobable>". Marca `[x]` lo termi
 
 ## Paso 6. Commit
 
-1. `git status --short` y `git diff --stat`. Revisa que no haya `.env`, llaves, `id.json`, dumps de base de datos ni archivos enormes. El hook `guardia` del plugin bloquea los casos obvios, pero revisa tú también.
+1. `git status --short` y `git diff --stat`. Revisa que no haya `.env`, llaves, `id.json`, dumps de base de datos ni archivos enormes. El hook de `cerebro-guardia` bloquea los casos obvios, pero revisa tú también.
 2. Agrega archivos por nombre, no `git add -A` a ciegas.
 3. Decide dónde:
    - Si los tests pasan: commit normal en la rama actual con mensaje claro (`feat: ...`, `fix: ...`).

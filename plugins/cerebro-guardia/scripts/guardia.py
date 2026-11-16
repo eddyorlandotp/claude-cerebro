@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""guardia.py - hook PreToolUse (matcher Bash) del plugin cerebro-base.
+"""guardia.py - hook PreToolUse (matcher Bash) del plugin cerebro-guardia.
 
 Lee el payload JSON de stdin y decide:
   - deny: comandos catastroficos y commits/adds que meterian secretos al repo.
@@ -492,7 +492,7 @@ def main():
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": decision,
-                "permissionDecisionReason": "[cerebro-base/guardia] " + razon,
+                "permissionDecisionReason": "[cerebro-guardia] " + razon,
             }
         }, ensure_ascii=False))
     except Exception:

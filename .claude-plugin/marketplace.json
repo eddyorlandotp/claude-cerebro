@@ -2,13 +2,18 @@
   "name": "cerebro",
   "description": "Skills, agentes y hooks en español para que Claude Code planee, investigue y verifique mejor: Solana, web, juegos, Linux y negocio.",
   "owner": {
-    "name": "Eddy Quiroz"
+    "name": "eddyorlandotp"
   },
   "plugins": [
     {
       "name": "cerebro-base",
       "source": "./plugins/cerebro-base",
       "description": "Método de trabajo: modo mentor, memoria en Obsidian, git como red de seguridad, protección de secretos, investigar antes de codear, deploy y cierre de sesión."
+    },
+    {
+      "name": "cerebro-guardia",
+      "source": "./plugins/cerebro-guardia",
+      "description": "Hook guardián: bloquea commits con .env o llaves privadas y comandos destructivos (rm -rf del sistema, force push a main). No agrega nada al contexto."
     },
     {
       "name": "cerebro-solana",

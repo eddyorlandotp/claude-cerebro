@@ -75,7 +75,7 @@ gitleaks git --pre-commit --redact --staged --verbose .     # solo lo que está 
 - Como hook de pre-commit (con el framework `pre-commit`): repo `https://github.com/gitleaks/gitleaks`, hook `id: gitleaks`; corre `pre-commit autoupdate` para fijar la versión actual.
 - GitHub tiene push protection para repos públicos, pero no confíes solo en ella: escanea localmente.
 
-El hook `guardia` de este plugin ya bloquea `git add`/`git commit` de `.env`, `.dev.vars`, `id.json`, `*keypair*.json`, `*.pem` y de contenido con `BEGIN ... PRIVATE KEY` o arreglos de 64 bytes. Es una red, no un reemplazo de gitleaks ni de tu cuidado.
+El hook del plugin `cerebro-guardia` ya bloquea `git add`/`git commit` de `.env`, `.dev.vars`, `id.json`, `*keypair*.json`, `*.pem` y de contenido con `BEGIN ... PRIVATE KEY` o arreglos de 64 bytes. Es una red, no un reemplazo de gitleaks ni de tu cuidado.
 
 ## Errores comunes
 

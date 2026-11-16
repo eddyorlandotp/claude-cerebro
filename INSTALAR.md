@@ -32,7 +32,7 @@ claude plugin marketplace add eddyorlandotp/claude-cerebro
 
 Instala cada uno con `claude plugin install <nombre>@cerebro`:
 
-cerebro-base, cerebro-solana, cerebro-cripto, cerebro-web, cerebro-codigo, cerebro-ia, cerebro-apps, cerebro-juegos, cerebro-diseno, cerebro-linux, cerebro-casa, cerebro-negocio, cerebro-vida
+cerebro-guardia, cerebro-base, cerebro-solana, cerebro-cripto, cerebro-web, cerebro-codigo, cerebro-ia, cerebro-apps, cerebro-juegos, cerebro-diseno, cerebro-linux, cerebro-casa, cerebro-negocio, cerebro-vida
 
 ## Paso 2: oficiales de Anthropic (marketplace `claude-plugins-official`)
 

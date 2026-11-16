@@ -21,11 +21,12 @@ Claude te pregunta qué perfil quieres (completo, completo + ECC o solo cerebro)
 
 ## Qué trae
 
-### Plugins propios (marketplace `cerebro`): 13 plugins, 86 skills
+### Plugins propios (marketplace `cerebro`): 14 plugins, 86 skills
 
 | Plugin | Para qué |
 |---|---|
-| `cerebro-base` | Método de trabajo: modo mentor, memoria en Obsidian, git como red de seguridad, secretos y llaves, investigar antes de codear, deploy, cierre de sesión, ahorro de tokens y dieta de contexto. Incluye un **hook guardián** que bloquea commits con `.env` o llaves privadas y comandos destructivos. |
+| `cerebro-base` | Método de trabajo: modo mentor, memoria en Obsidian, git como red de seguridad, secretos y llaves, investigar antes de codear, deploy, cierre de sesión, ahorro de tokens y dieta de contexto. |
+| `cerebro-guardia` | **Hook guardián**: bloquea commits con `.env` o llaves privadas y comandos destructivos. No gasta contexto. |
 | `cerebro-solana` | Fundamentos de Solana, swaps y comisiones con Jupiter, Helius en tiempo real, envío rápido de transacciones, bot de copy trading, riesgo de memecoins, montos y decimales, billeteras sin custodia, señales y backtesting. |
 | `cerebro-cripto` | EVM y Base, Solidity básico y seguridad, análisis on-chain, conceptos DeFi y seguridad cripto personal. |
 | `cerebro-web` | Cloudflare Tunnel y dominio, decisiones del plan gratis de Cloudflare, bases de datos, cobros y suscripciones, SEO técnico y landings. |
