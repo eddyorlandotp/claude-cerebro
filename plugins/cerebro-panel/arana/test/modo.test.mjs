@@ -130,3 +130,10 @@ test('sin `claude` en el PATH avisa y no cambia nada', () => {
   assert.match(r.stderr, /No encuentro el comando `claude`/);
   assert.deepEqual(p.activos(), p.enabled);
 });
+
+test('estadoModo trae la lista de desfase (vacía en modo completo)', async () => {
+  const { estadoModo } = await import('../lib/modo.mjs');
+  const e = await estadoModo({ conCostos: false });
+  assert.ok(Array.isArray(e.desfase));
+  if (e.modo === 'completo') assert.equal(e.desfase.length, 0);
+});

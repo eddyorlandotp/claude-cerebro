@@ -126,8 +126,13 @@ export async function estadoModo({ configDir, conCostos = true } = {}) {
   const suma = (lista) => lista.reduce((a, f) => a + (f.costo ?? 0), 0);
   const prendidos = filas.filter((f) => f.activo);
   const apagados = filas.filter((f) => !f.activo);
+  const modo = leerModo();
+  // Desfase: modo.json dice "ligero" pero hay plugins con costo, fuera del núcleo, otra vez prendidos
+  // (pasa cuando `claude plugin install` reinstala encima: vuelve a prender lo apagado).
+  const desfase = modo === 'ligero' ? prendidos.filter((f) => !f.nucleo && f.costo !== 0).map((f) => f.clave) : [];
   return {
-    modo: leerModo(),
+    modo,
+    desfase,
     prendidos: prendidos.length,
     apagados: apagados.length,
     tokensFijos: suma(prendidos),

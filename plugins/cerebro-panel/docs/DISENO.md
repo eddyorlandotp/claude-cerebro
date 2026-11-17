@@ -158,3 +158,81 @@ Más pequeña, vive en la zona Hilo. Teje una telaraña radial: cada archivo toc
 ## Verificación de diseño (obligatoria antes de entregar)
 
 Capturas con Playwright en 1920×1080, 2560×1440, 3440×1440 y 1440×2560, en tres momentos del demo (reposo, araña entregando skills, turno a medias con error) y con dos zonas minimizadas. Revisar contra este documento: colores fuera de la paleta, textos cortados o encimados, zonas desalineadas, cualquier cosa que parezca plantilla.
+
+## Versión 2: profundidad, color y vida (pedido del usuario tras verla en su pantalla)
+
+El usuario la vio en sus dos monitores: "está al 80–90 %, le falta el toque que la diferencie". Esto **sustituye** lo que contradiga de arriba.
+
+### Color: una familia por cúmulo
+
+La regla de "solo tres colores" se relaja **solo para la biblioteca y lo que sale de ella**. Cada plugin tiene un tono propio; todo lo demás (marco, texto, cara, actividad de Claude) sigue en tinta + cian, y rosa/ámbar siguen significando error y "te toca".
+
+Paleta de cúmulos (misma claridad y saturación, pensada para sumarse en aditivo sin gritar):
+
+```css
+--c1: #86d5ea; /* cian   */  --c2: #7aa8ff; /* azul   */  --c3: #b79cf5; /* lila   */
+--c4: #e58ad0; /* orquídea */ --c5: #f29b7e; /* coral  */  --c6: #e6cf8a; /* arena  */
+--c7: #b9e07a; /* lima   */  --c8: #7fe0b0; /* menta  */
+```
+
+- Los plugins `cerebro-*` reciben tonos fijos y distintos entre vecinos; los de terceros, un tono por hash del nombre. Apagados: sin tono (`--tinta-3`).
+- El tono **viaja con la skill**: su etiqueta, el paquete que lanza la araña, su ficha bajo la cara, su satélite en la órbita, el filo superior de su bloque en el Flujo y su verbo en Actividad usan el tono del cúmulo de origen. Así se lee de un vistazo de dónde vino cada cosa.
+- Nada de degradados entre tonos ni arcoíris en una misma pieza: cada pieza, un tono.
+
+### Biblioteca en 3D
+
+- Los cúmulos son nubes **volumétricas** (puntos con x, y, z; caída gaussiana en las tres) repartidas en un espacio con profundidad. Proyección en perspectiva hecha a mano en el canvas 2D (o WebGL solo para la capa de puntos si hace falta, con respaldo 2D); cero dependencias.
+- Profundidad legible: los puntos lejanos son más chicos y tenues, los cercanos más grandes y brillantes; los rótulos de plugins siguen al cúmulo y se atenúan con la distancia.
+- **Cámara viva**: órbita lenta y continua (un giro completo en 2–3 min, con leve cabeceo). Cuando la araña marca y lanza skills, la cámara **se acerca y la encuadra** (500–700 ms, ease-in-out), y al terminar regresa a la órbita. Con `prefers-reduced-motion`: cámara fija.
+- **La araña en 3D**: camina sobre los cúmulos, se descuelga y **salta de uno a otro** con arco y un hilo que deja atrás (el hilo queda unos segundos y se desvanece). Las patas siguen con cinemática inversa; su tamaño cambia con la profundidad.
+
+### La araña con más libertad (a quién le avienta qué)
+
+| Lo que pasa | La araña lanza a… |
+|---|---|
+| Skills sugeridas para el mensaje | la cara (como ahora) |
+| Hilo guardado / resumen de sesión actualizado | la araña del Hilo, que lo atrapa y lo teje |
+| Sugerencias que no se usaron al terminar el turno | las recoge y las regresa a su cúmulo |
+| Claude usa una skill | un pulso del tono del cúmulo corre de la cara al cúmulo y la araña voltea |
+| Fin de turno | lanza un hilo al Flujo que "cose" el turno terminado a la historia |
+
+### La cara ya no está sola: la órbita
+
+Alrededor de la cara giran, en elipses inclinadas (profundidad real: pasan por detrás y por delante), los **satélites de lo que Claude tiene en la cabeza ahora**:
+
+- skills cargadas (cuadro del tono de su cúmulo, con nombre al acercarse),
+- archivos en juego en este turno (punto con el nombre corto; más grande cuanto más se tocó; un destello cuando se edita),
+- subagentes (caritas pequeñas; reemplaza la fila de subagentes bajo la cara),
+- el pedido actual como un arco de texto tenue en la órbita exterior.
+
+La órbita ocupa los lados de la zona (en horizontal se ensancha; en vertical se achata). Vacía = solo los anillos tenues. Es información, no adorno: cada satélite corresponde a un evento real.
+
+### El Flujo ya no está solo
+
+- **Araña del Flujo** (pequeña): cose con hilo cada bloque al siguiente cuando termina un paso, y espera en el bloque en curso.
+- **Historia**: los turnos anteriores quedan debajo como filas compactas (una tira de celdas por turno, cada celda un paso con el color de su clase; rosa donde falló), de modo que la zona se llena con el trabajo de la sesión.
+- **Regla de tiempo**: eje fino bajo los bloques con la duración de cada paso a escala; se ve dónde se fue el tiempo.
+- Si hay pocos bloques, crecen (más alto y con el resumen completo) en vez de dejar hueco.
+
+### Vida en reposo (nada se queda tieso)
+
+- **Cara**: mira de vez en cuando a la araña que pasa o a un satélite; bosteza (ojos que se entrecierran) antes de dormirse; dormida, respira. Cada 3–6 min dormida **despierta un momento**, mira al frente y suelta una burbuja corta ("¿sigues ahí?", "aquí ando", "cuando quieras") y vuelve a dormirse. Frases en un archivo aparte, fáciles de editar. Nunca en ámbar (ámbar es solo cuando de verdad espera permiso o respuesta).
+- **Araña del Hilo**: nunca quieta más de unos segundos: recorre la tela, repara un rayo, se descuelga de un hilo y sube, se acicala.
+- **Araña de la biblioteca**: además de pasear, a ratos se queda en un cúmulo "leyendo" (los puntos cercanos laten).
+- Todo movimiento de reposo es lento y de baja amplitud; se pausa con `document.hidden` y respeta `prefers-reduced-motion`.
+
+### Momentos (el "toque")
+
+Pocos y con motivo, cada uno atado a un evento real:
+
+1. **Llega un mensaje**: una onda recorre la biblioteca desde la araña y los cúmulos que coinciden se encienden un instante antes de que ella salga hacia ellos.
+2. **Entrega**: acercamiento de cámara + paquetes de colores en arco con estela.
+3. **Error**: la tela del Hilo vibra y un rayo se rompe (se repara al corregirse).
+4. **Fin de turno**: los satélites se recogen hacia la cara, la araña cose el turno a la historia.
+5. **Compactación**: la tela se recoge y los satélites se reducen a los del resumen.
+
+### Límites que siguen firmes
+
+- Sin degradados de relleno, sin vidrio, sin sombras de resplandor CSS, sin esquinas redondeadas en paneles.
+- 60 fps con tope (el usuario midió 165 Hz y CPU alta sin tope): presupuesto ≤ 6 ms por cuadro a 3440×1440; degradar puntos antes que perder cuadros.
+- Legibilidad primero: ningún efecto tapa texto que haya que leer.

@@ -213,6 +213,10 @@ async function cmdModo() {
     const e = await m.estadoModo({});
     if (json) return decir(JSON.stringify(e, null, 2));
     decir(pintar(e));
+    if (e.desfase.length) {
+      decir(`OJO: el modo guardado es ligero, pero ${e.desfase.length} plugins fuera del núcleo están prendidos otra vez (pasa al reinstalar o actualizar plugins).`);
+      decir('     Para volver a apagarlos: arana modo ligero   ·   Para dejar todo prendido: arana modo completo');
+    }
     decir(`skills al alcance de la araña en plugins apagados: ${e.skillsApagadas} (≈ ${e.tokensApagados.toLocaleString('es-MX')} tokens que no se cargan)`);
     for (const f of [...e.filas].sort((a, b) => (b.costo ?? 0) - (a.costo ?? 0))) {
       decir(`  ${f.activo ? 'prendido' : 'apagado '}  ${String(f.costo ?? '?').padStart(6)} tok  ${f.clave}${f.nucleo ? '  (núcleo)' : ''}`);
