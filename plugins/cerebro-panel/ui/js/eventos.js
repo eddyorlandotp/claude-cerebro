@@ -2,7 +2,7 @@
 // creciente) o el guion demo reproducido en el navegador (?demo=1).
 
 import { estado, recibir, reiniciar, emitir } from './estado.js';
-import { reloj, limpiarTareas } from './reloj.js';
+import { reloj } from './reloj.js';
 
 // ---------- Modo vivo: EventSource ----------
 let fuente = null, intento = 0, vigia = null, ultimoMensaje = 0, reintento = null;
@@ -49,7 +49,7 @@ export class Demo {
     this.eventos = (guion.eventos || []).slice().sort((a, b) => a.t - b.t);
     this.fin = (this.eventos.length ? this.eventos[this.eventos.length - 1].t : 0) + 9000;   // respiro antes de repetir
     this.t = 0; this.i = 0; this.base = Date.now(); this.vueltas = 0;
-    this.enBucle = true;
+    this.enBucle = !new URLSearchParams(location.search).has('reposo');      // con ?reposo=1 el guion corre una vez y luego hay silencio
   }
   static async cargar() {
     // Con `python3 -m http.server` desde la raíz del plugin queda en ../demo/; el servidor real lo sirve en /demo/.
@@ -76,9 +76,8 @@ export class Demo {
       recibir({ ...ev, ts: this.base + this.vueltas * this.fin + t, sesion: ev.sesion || 'demo' });
     }
     if (this.enBucle && this.t >= this.fin) {
+      // otra vuelta: como hace el servidor, sigue la misma sesión (turno 2, 3…) y la historia se acumula
       this.vueltas += 1; this.t = 0; this.i = 0;
-      limpiarTareas();
-      reiniciar(true);
     }
   }
 }

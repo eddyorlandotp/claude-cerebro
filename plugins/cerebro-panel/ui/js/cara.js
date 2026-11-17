@@ -21,6 +21,7 @@ export class Cara {
     this.destello = 0;                      // 0..1 destello del anillo
     this.tonoDestello = 'rosa';
     this.mirada = null;                     // { x, y } punto al que mira cuando delega
+    this.vistazo = null;                    // { x, y, hasta } vistazo breve a algo que pasa (la araña, un satélite)
     this.lado = semilla % 2 ? 1 : -1;       // hacia qué lado piensa
     this.contexto = 0;                      // 0..1 ventana usada
     this.alfa = 1;
@@ -44,8 +45,14 @@ export class Cara {
     const t = (reloj.t - this.desde) / 1000, quieto = reloj.quieto;
     switch (this.estado) {
       case 'dormida': return [0, 0.035, 0.07];
-      case 'pensando': return quieto ? [0.07 * this.lado, -0.085, 0.95]
-        : [0.07 * this.lado + 0.018 * Math.sin(t * 0.9), -0.085 + 0.014 * Math.sin(t * 0.63 + 1), 0.95];
+      case 'bostezo': { const k = Math.min(1, t / 1.5); return [0, 0.03 * k, 1 - 0.9 * k * k]; }      // se le van cerrando los ojos
+      case 'despierta': return [0, -0.012, 1.06];
+      case 'pensando': {
+        const v = this.vistazo;
+        if (v && reloj.t < v.hasta && !quieto) { const dx = v.x - this.x, dy = v.y - this.y, d = Math.hypot(dx, dy) || 1; return [(dx / d) * 0.075, (dy / d) * 0.06, 0.95]; }
+        return quieto ? [0.07 * this.lado, -0.085, 0.95]
+          : [0.07 * this.lado + 0.018 * Math.sin(t * 0.9), -0.085 + 0.014 * Math.sin(t * 0.63 + 1), 0.95];
+      }
       case 'leyendo': {
         if (quieto) return [0, 0.02, 0.85];
         // barre de izquierda a derecha, baja un renglón, vuelve
@@ -66,7 +73,11 @@ export class Cara {
       case 'hablando': return [0, quieto ? 0 : 0.008 * Math.sin(t * 7), 1];
       case 'esperando': return [0, 0, 1.12];
       case 'tropezo': return [0, 0.01, t < 0.3 ? 0.05 : 0.8];
-      default: return [0, 0, 1];   // atenta
+      default: {   // atenta: al frente, o un vistazo a algo que pasa
+        const v = this.vistazo;
+        if (v && reloj.t < v.hasta && !quieto) { const dx = v.x - this.x, dy = v.y - this.y, d = Math.hypot(dx, dy) || 1; return [(dx / d) * 0.075, (dy / d) * 0.06, 1]; }
+        return [0, 0, 1];
+      }
     }
   }
 
@@ -76,7 +87,7 @@ export class Cara {
     this.mx.avanzar(dt); this.my.avanzar(dt); this.ab.avanzar(dt);
     this.latido.meta = 1; this.latido.avanzar(dt);
     if (this.parpadeo > 0) this.parpadeo -= dt;
-    else if (this.estado !== 'dormida' && this.estado !== 'tropezo' && !reloj.pausado) {
+    else if (this.estado !== 'dormida' && this.estado !== 'bostezo' && this.estado !== 'tropezo' && !reloj.pausado) {
       this.proximo -= dt;
       if (this.proximo <= 0) {
         this.parpadeo = 0.17;
@@ -94,7 +105,9 @@ export class Cara {
     let x = this.x, y = this.y;
     if (this.sacudida > 0 && !quieto) x += Math.sin(this.sacudida * 70) * 4 * (this.sacudida / 0.3) * (this.mini ? 0.4 : 1);
     // respiración: lenta dormida, apenas perceptible despierta
-    const resp = quieto ? 1 : this.estado === 'dormida' ? 1 + 0.014 * Math.sin(t * 1.1) : 1 + 0.004 * Math.sin(t * 1.9);
+    const tEst = (reloj.t - this.desde) / 1000;
+    const resp = quieto ? 1 : this.estado === 'dormida' ? 1 + 0.016 * Math.sin(t * 1.1)
+      : this.estado === 'bostezo' ? 1 + 0.035 * Math.sin(Math.PI * Math.min(1, tEst / 1.5)) : 1 + 0.004 * Math.sin(t * 1.9);
     const esc = resp * limitar(this.latido.x, 0.9, 1.12);
 
     ctx.save();
@@ -131,7 +144,7 @@ export class Cara {
       }
       if (this.destello > 0.02) {
         ctx.globalAlpha = this.alfa * Math.min(1, this.destello);
-        ctx.strokeStyle = COLOR[this.tonoDestello] || COLOR.cian; ctx.lineWidth = 2;
+        ctx.strokeStyle = COLOR[this.tonoDestello] || this.tonoDestello || COLOR.cian; ctx.lineWidth = 2;      // nombre de la paleta o un tono (#hex)
         ctx.beginPath(); ctx.arc(x, y, ra, 0, TAU); ctx.stroke();
         ctx.globalAlpha = this.alfa;
       }

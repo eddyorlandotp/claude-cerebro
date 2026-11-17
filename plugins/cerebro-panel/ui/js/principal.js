@@ -6,6 +6,10 @@
 //   ?t=5000         salta a ese ms del guion (avanza la simulación en seco, sin dibujar)
 //   ?pausa=1        congela el guion tras el salto (para capturas)
 //   ?min=a,b        arranca con esas zonas minimizadas (no se guarda)
+//   ?vuelta=2       (con ?t=) deja pasar antes N vueltas completas del guion
+//   ?reposo=1       acelera 20× los tiempos de reposo (dormirse, despertar) y el demo no se repite
+//   ?camara=fija    la cámara de la biblioteca no orbita ni se acerca
+//   ?fps=0          quita el tope de 60 cuadros por segundo
 
 import { reloj, avanzarReloj } from './reloj.js';
 import { estado } from './estado.js';
@@ -32,7 +36,7 @@ function paso(dtMs) {
   pensamiento.avanzar(dt);
   biblioteca.avanzar(dt, reloj.t);
   hilo.avanzar(dt);
-  flujo.avanzar();
+  flujo.avanzar(dt);
   barra.avanzar();
 }
 
@@ -40,6 +44,7 @@ function paso(dtMs) {
 const stats = { cuadros: 0, msTotal: 0, msMax: 0, reiniciar() { this.cuadros = 0; this.msTotal = 0; this.msMax = 0; }, get promedio() { return this.cuadros ? this.msTotal / this.cuadros : 0; } };
 
 let anterior = 0;
+const medir = params.has('medir');
 const topeFps = params.has('fps') ? Math.max(0, Number(params.get('fps')) || 0) : 60;
 function cuadro(ahora) {
   requestAnimationFrame(cuadro);
@@ -53,11 +58,14 @@ function cuadro(ahora) {
   const t0 = performance.now();
   distribucion.cuadro();
   if (!reloj.pausado) paso(dtReal * (demo ? velocidad : 1));
-  else { pensamiento.avanzar(dtReal / 1000); flujo.avanzar(); barra.avanzar(); }
+  else { pensamiento.avanzar(dtReal / 1000); flujo.avanzar(dtReal / 1000); barra.avanzar(); }
   reloj.cuadro += 1;
   dibujar(reloj.t);
+  if (medir) lienzo.ctx.getImageData(0, 0, 1, 1);      // ?medir=1: obliga a rasterizar ya, para que el tiempo medido incluya el dibujo real
   const ms = performance.now() - t0;
   stats.cuadros += 1; stats.msTotal += ms; if (ms > stats.msMax) stats.msMax = ms;
+  lienzo.carga += (ms - lienzo.carga) * 0.05;
+  lienzo.intervalo += (dtReal - lienzo.intervalo) * 0.05;      // ms reales entre cuadros (si sube, se están perdiendo cuadros)
 }
 
 async function arrancar() {
@@ -83,10 +91,12 @@ async function arrancar() {
     if (demo && salto > 0) {
       // avanzar en seco hasta el momento pedido, a pasos fijos de 16 ms
       reloj.rapido = true;
+      // ?vuelta=N: además deja pasar N vueltas completas del guion antes (para ver la historia del Flujo llena)
+      const vueltas = Math.max(0, Math.floor(Number(params.get('vuelta')) || 0));
       const hasta = Math.min(salto, demo.fin - 1);
-      while (demo.t < hasta) paso(Math.min(16, hasta - demo.t));
+      while (demo.vueltas < vueltas || demo.t < hasta) paso(Math.min(16, demo.vueltas < vueltas ? 16 : hasta - demo.t));
       reloj.rapido = false;
-      actividad.asentar(); hilo.asentar(); pensamiento.asentar(); flujo.remedir();
+      actividad.asentar(); hilo.asentar(); pensamiento.asentar(); biblioteca.asentar(); flujo.asentar(); flujo.remedir();
     }
     if (params.get('pausa')) reloj.pausado = true;
   } else {

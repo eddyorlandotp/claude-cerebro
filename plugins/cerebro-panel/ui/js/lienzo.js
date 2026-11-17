@@ -4,7 +4,7 @@
 
 const canvas = document.getElementById('lienzo');
 export const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-export const lienzo = { ancho: 0, alto: 0, dpr: 1, brillo: 1 };
+export const lienzo = { ancho: 0, alto: 0, dpr: 1, brillo: 1, carga: 0, intervalo: 17, ctx };   // carga = ms por cuadro (media móvil), para degradar puntos
 
 const capas = [];
 /** Registra una capa: fn(ctx, t). Orden menor = más al fondo. */

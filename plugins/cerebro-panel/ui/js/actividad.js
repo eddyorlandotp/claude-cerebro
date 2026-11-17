@@ -4,6 +4,7 @@
 import { en, nombreSkill } from './estado.js';
 import { reloj } from './reloj.js';
 import { el, hora, duracion, truncar } from './util.js';
+import { tonoSkill } from './tonos.js';
 
 const lista = document.getElementById('registro');
 const meta = document.getElementById('act-meta');
@@ -35,7 +36,9 @@ en('dicho', (ev) => { if ((ev.texto || '').trim()) linea(ev, 'Dice', ev.texto, e
 en('herramienta', (ev) => {
   if (ev.fase === 'inicio') {
     const detalle = ev.clase === 'skill' ? nombreSkill(ev.resumen) : ev.resumen || ev.nombre || '';
-    abiertas.set(ev.id, linea(ev, VERBO[ev.clase] || 'Otro', detalle, 'curso' + (ev.agente ? ' sub' : '')));
+    const li = linea(ev, VERBO[ev.clase] || 'Otro', detalle, 'curso' + (ev.agente ? ' sub' : ''));
+    if (ev.clase === 'skill') li.style.setProperty('--tono', tonoSkill(ev.resumen).hex);      // el tono del cúmulo viaja con la skill
+    abiertas.set(ev.id, li);
   } else {
     const li = abiertas.get(ev.id); abiertas.delete(ev.id);
     if (!li) return;

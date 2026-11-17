@@ -159,6 +159,21 @@ export class Arana {
   distCadera(p) { const c = this.aMundo(p.cadera.x, p.cadera.y); return Math.hypot(p.px - c.x, p.py - c.y) / this.s; }
   lanzar() { this.gesto = 1; }
 
+  /** Mueve la araña entera (cuerpo y pies plantados) sin que dé pasos: lo usa la cámara 3D. */
+  trasladar(dx, dy) {
+    if (!dx && !dy) return;
+    this.x += dx; this.y += dy;
+    for (const p of this.patas) { p.px += dx; p.py += dy; if (p.paso) { p.paso.x0 += dx; p.paso.y0 += dy; p.paso.x1 += dx; p.paso.y1 += dy; } }
+  }
+  /** Cambia el tamaño conservando la postura (los pies se acercan o alejan del cuerpo): profundidad. */
+  escalar(s) {
+    const k = s / this.s;
+    if (Math.abs(k - 1) < 1e-4) return;
+    const ex = (v) => this.x + (v - this.x) * k, ey = (v) => this.y + (v - this.y) * k;
+    for (const p of this.patas) { p.px = ex(p.px); p.py = ey(p.py); if (p.paso) { p.paso.x0 = ex(p.paso.x0); p.paso.y0 = ey(p.paso.y0); p.paso.x1 = ex(p.paso.x1); p.paso.y1 = ey(p.paso.y1); } }
+    this.s = s;
+  }
+
   /** Posición de la boca (de donde salen los paquetes) */
   frente() { return this.aMundo(1.2, 0); }
 

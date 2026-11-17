@@ -4,7 +4,7 @@
 // nudo (más veces tocado = más cerca del centro) y la cantidad de anillos refleja cuánta
 // ventana de contexto se ha llenado. En `compactacion` la tela se recoge y vuelve a empezar.
 
-import { estado, en } from './estado.js';
+import { estado, en, lugares } from './estado.js';
 import { reloj } from './reloj.js';
 import { alCambiar, minimizada } from './distribucion.js';
 import { capa, fuente } from './lienzo.js';
@@ -47,7 +47,7 @@ function posNudo(n) { const c = centro(), a = angulos[n.rayo], r = c.R * n.radio
 function irJuntoA(n) {
   const p = posNudo({ ...n, radio: n.meta }), c = centro();
   const dx = c.x - p.x, dy = c.y - p.y, d = Math.hypot(dx, dy) || 1, sep = Math.min(d, arana.s * 3.2);
-  arana.irA(p.x + (dx / d) * sep, p.y + (dy / d) * sep, 70);
+  seguirRuta([{ x: p.x + (dx / d) * sep, y: p.y + (dy / d) * sep }], 70, null);
 }
 
 function sincronizarNudos(irAlUltimo) {
@@ -61,7 +61,7 @@ function sincronizarNudos(irAlUltimo) {
       nudos.set(a.ruta, n);
     }
     n.accion = a.accion;
-    if (n.veces !== a.veces) { n.veces = a.veces; if (irAlUltimo) { n.toque = 1; irJuntoA(n); descanso = 5; } }
+    if (n.veces !== a.veces) { n.veces = a.veces; if (irAlUltimo) { n.toque = 1; if (!reloj.rapido) { irJuntoA(n); descanso = 1.8; } } }
     n.meta = limitar(0.95 - Math.min(a.veces, 6) * 0.13, 0.2, 0.95);
   });
   for (const ruta of [...nudos.keys()]) if (!vistos.has(ruta)) nudos.delete(ruta);
@@ -149,19 +149,94 @@ en('hilo', (ev) => {
 });
 en('compactacion', () => { recogiendo = 0.5; });
 
+// ----- la tela reacciona -----
+let vibra = 0;                // 0..1 vibración de la tela (un error la sacude)
+let roto = null;              // { rayo, k (1 = roto del todo, 0 = reparado), clase, reparando }
+let destello = 0;             // 0..1 la tela brilla cuando la araña atrapa el hilo guardado
+let repaso = null;            // { rayo, k } rayo que la araña está repasando (brilla un momento)
+// Momento 3: error → la tela vibra y un rayo se rompe (se repara cuando eso mismo sale bien, o al cerrar el turno)
+en('herramienta', (ev) => {
+  if (ev.fase !== 'fin' || ev.agente) return;
+  if (ev.ok === false) {
+    vibra = 1;
+    if (!roto) { const libres = angulos.map((_, i) => i).filter((i) => ![...nudos.values()].some((n) => n.rayo === i)); roto = { rayo: libres[Math.floor(Math.random() * libres.length)] ?? 0, k: 1, clase: clases.get(ev.id), reparando: false }; }
+  } else if (roto && !roto.reparando && clases.get(ev.id) === roto.clase) reparar();
+});
+const clases = new Map();     // id de herramienta -> clase (el `fin` no la trae)
+en('herramienta', (ev) => { if (ev.fase === 'inicio') clases.set(ev.id, ev.clase); });
+en('fin_turno', () => { if (roto && !roto.reparando) reparar(); });
+en('reinicio', () => { roto = null; vibra = 0; ruta = []; });
+function reparar() {
+  roto.reparando = true;
+  if (reloj.rapido) { roto = null; return; }
+  const c = centro(), a = angulos[roto.rayo], r = c.R * largos[roto.rayo] * 0.42;
+  seguirRuta([{ x: c.x + Math.cos(a) * r, y: c.y + Math.sin(a) * r }], 60, () => { if (roto) roto.cose = true; });
+}
+// La araña de la biblioteca le lanza el hilo guardado: lo atrapa y lo teje (da una vuelta por la tela)
+en('hilo-atrapado', () => {
+  if (minimizada('hilo') || tela.w < 40) return;
+  arana.lanzar(); destello = 1;
+  const c = centro(), rr = c.R * 0.5, i0 = Math.floor(Math.random() * RADIOS);
+  seguirRuta([0, 3, 6, 9].map((d) => { const a = angulos[(i0 + d) % RADIOS]; return { x: c.x + Math.cos(a) * rr, y: c.y + Math.sin(a) * rr }; }), 85, null);
+});
+lugares.aranaHilo = () => (minimizada('hilo') || tela.w < 40 ? { x: innerWidth - 40, y: 18 } : { x: arana.x, y: arana.y });
+
+// ----- vida en reposo: nunca se queda tiesa -----
+const LENTO = new URLSearchParams(location.search).has('reposo') ? 0.4 : 1;
+let ruta = [], alTerminarRuta = null, velRuta = 30;
+let ocioEn = 2;               // s para la siguiente ocurrencia
+let cuelga = null;            // { ancla: {x,y}, fase: 'baja'|'espera'|'sube', t }
+let acicala = 0;              // s restantes de acicalarse
+function seguirRuta(pts, vel, alTerminar) {
+  if (cuelga) { cuelga = null; arana.modo = 'andar'; arana.plantar(); }
+  ruta = pts.slice(); velRuta = vel; alTerminarRuta = alTerminar; acicala = 0; descanso = 0;
+  arana.irA(ruta[0].x, ruta[0].y, vel);
+}
+function ocurrencia() {
+  const c = centro(), u = Math.random();
+  const i = Math.floor(Math.random() * RADIOS), a = angulos[i];
+  if (u < 0.4) {
+    // recorre la tela: va a un cruce de anillo y rayo
+    const rr = c.R * (0.15 + Math.random() * 0.6) * largos[i];
+    seguirRuta([{ x: c.x + Math.cos(a) * rr, y: c.y + Math.sin(a) * rr }], 24 + Math.random() * 14, null);
+  } else if (u < 0.62) {
+    // repasa un rayo hasta la punta
+    const rr = c.R * largos[i] * 0.9;
+    seguirRuta([{ x: c.x + Math.cos(a) * rr, y: c.y + Math.sin(a) * rr }], 34, () => { repaso = { rayo: i, k: 1 }; });
+  } else if (u < 0.82) {
+    // se descuelga de un hilo y vuelve a subir
+    const abajo = angulos.map((x, k) => ({ k, s: Math.sin(x) })).sort((p, q) => q.s - p.s)[0].k;
+    const ancla = { x: c.x + Math.cos(angulos[abajo]) * c.R * 0.55, y: c.y + Math.sin(angulos[abajo]) * c.R * 0.55 };
+    const largo = Math.min(c.R * 0.5, tela.y + tela.h - ancla.y - arana.span * 0.55);
+    if (largo < 14) { acicala = 1.6; return; }
+    seguirRuta([ancla], 34, () => { cuelga = { ancla, largo, fase: 'baja', t: 0 }; arana.modo = 'colgar'; arana.irA(ancla.x, ancla.y + largo, 26); });
+  } else acicala = 1.4 + Math.random();      // se acicala: frota las patas delanteras
+}
+
 export function iniciar() {
   alCambiar(medirTela);
   medirTela(); pintar();
 
-  capa(15, (ctx) => {
+  capa(15, (ctx, t) => {
     if (minimizada('hilo') || tela.w < 40 || tela.h < 40) return;
     const c = centro(), R = c.R * tension;
     if (R < 4) return;
     ctx.lineWidth = 1;
+    // la vibración mueve un poco cada rayo
+    const A = vibra > 0.01 && !reloj.quieto ? angulos.map((a, i) => a + vibra * 0.045 * Math.sin(t / 22 + i * 1.9)) : angulos;
+    const L = (i) => largos[i] * (roto && roto.rayo === i ? 0.42 + 0.58 * (1 - roto.k) : 1);
     // rayos
     ctx.beginPath();
-    angulos.forEach((a, i) => { ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(a) * R * largos[i], c.y + Math.sin(a) * R * largos[i]); });
-    ctx.strokeStyle = rgba('cian', 0.2); ctx.stroke();
+    A.forEach((a, i) => { ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(a) * R * L(i), c.y + Math.sin(a) * R * L(i)); });
+    ctx.strokeStyle = rgba('cian', 0.2 + 0.3 * destello); ctx.stroke();
+    if (repaso) { const a = A[repaso.rayo]; ctx.strokeStyle = rgba('cian', 0.7 * repaso.k); ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(a) * R * L(repaso.rayo), c.y + Math.sin(a) * R * L(repaso.rayo)); ctx.stroke(); }
+    if (roto) {
+      // el rayo roto: el cabo suelto cuelga, en rosa
+      const a = A[roto.rayo], bx = c.x + Math.cos(a) * R * L(roto.rayo), by = c.y + Math.sin(a) * R * L(roto.rayo), cabo = R * 0.3 * roto.k;
+      ctx.strokeStyle = rgba('rosa', 0.9 * Math.min(1, roto.k * 2));
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + Math.cos(a) * cabo * 0.4, by + cabo * 0.5, bx + Math.cos(a) * cabo * 0.25, by + cabo); ctx.stroke();
+      ctx.fillStyle = COLOR.rosa; ctx.globalAlpha = Math.min(1, roto.k * 2); ctx.fillRect(Math.round(bx) - 2, Math.round(by) - 2, 4, 4); ctx.globalAlpha = 1;
+    }
     // anillos: tramos entre rayos, combados hacia el centro como hilo colgado
     const enteros = Math.floor(anillos), parte = anillos - enteros;
     ctx.beginPath();
@@ -169,16 +244,17 @@ export function iniciar() {
       const hasta = k < enteros ? RADIOS : Math.floor(parte * RADIOS);
       const rr = R * (0.1 + 0.9 * ((k + 1) / 18));
       for (let i = 0; i < hasta; i++) {
-        const j = (i + 1) % RADIOS, a0 = angulos[i], a1 = angulos[j];
-        const r0 = Math.min(rr, R * largos[i]), r1 = Math.min(rr, R * largos[j]);
-        const x0 = c.x + Math.cos(a0) * r0, y0 = c.y + Math.sin(a0) * r0, x1 = c.x + Math.cos(a1) * r1, y1 = c.y + Math.sin(a1) * r1;
+        const j = (i + 1) % RADIOS, a0 = A[i], a1 = A[j];
+        if (rr > R * L(i) || rr > R * L(j)) continue;      // más allá de la punta (o de la rotura) no hay hilo
+        const x0 = c.x + Math.cos(a0) * rr, y0 = c.y + Math.sin(a0) * rr, x1 = c.x + Math.cos(a1) * rr, y1 = c.y + Math.sin(a1) * rr;
         const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
         ctx.moveTo(x0, y0); ctx.quadraticCurveTo(mx + (c.x - mx) * 0.12, my + (c.y - my) * 0.12, x1, y1);
       }
     }
-    ctx.strokeStyle = rgba('cian', 0.34); ctx.stroke();
+    ctx.strokeStyle = rgba('cian', 0.34 + 0.45 * destello); ctx.stroke();
     // centro de la tela: un nudo pequeño
     ctx.fillStyle = COLOR.cianTenue; ctx.beginPath(); ctx.arc(c.x, c.y, 2, 0, TAU); ctx.fill();
+    if (cuelga) { ctx.strokeStyle = rgba('cian', 0.7); ctx.beginPath(); ctx.moveTo(cuelga.ancla.x, cuelga.ancla.y); ctx.lineTo(arana.x, arana.y); ctx.stroke(); }
     arana.dibujar(ctx, COLOR.cian, 1);
     // nudos: un archivo cada uno (encima de la araña, para que el nombre siempre se lea)
     const px = Math.max(9, Math.round((parseFloat(getComputedStyle(document.documentElement).fontSize) || 14) * 0.74));
@@ -201,7 +277,7 @@ export function iniciar() {
 
 export function avanzar(dt) {
   if (tela.w < 40) return;
-  // la tela crece con el contexto (un anillo cada ~8 % de ventana), se recoge al compactar
+  // la tela crece con el contexto (un anillo cada ~7 % de ventana), se recoge al compactar
   const metaA = anillosMeta();
   if (recogiendo > 0) {
     recogiendo -= dt; tension = Math.max(0, recogiendo / 0.5);
@@ -211,7 +287,36 @@ export function avanzar(dt) {
     anillos += limitar(metaA - anillos, -dt * 6, dt * 1.6);
   }
   for (const n of nudos.values()) { n.radio += (n.meta - n.radio) * Math.min(1, dt * 3); if (n.toque > 0) n.toque = Math.max(0, n.toque - dt * 1.2); }
-  if (descanso > 0) { descanso -= dt; if (descanso <= 0) { const c = centro(); arana.irA(c.x, c.y, 40); } }
-  if (arana.meta && arana.distMeta() < arana.s) arana.parar();
+  if (vibra > 0) vibra = Math.max(0, vibra - dt * 1.1);
+  if (destello > 0) destello = Math.max(0, destello - dt * 0.9);
+  if (repaso) { repaso.k -= dt * 0.8; if (repaso.k <= 0) repaso = null; }
+  if (roto && roto.cose) { roto.k -= dt / 0.9; if (roto.k <= 0) roto = null; }
+  if (reloj.rapido) return;
+
+  // a dónde va: una ruta pendiente, el descenso por el hilo, o volver al centro tras visitar un nudo
+  if (ruta.length) {
+    arana.irA(ruta[0].x, ruta[0].y, velRuta);
+    if (arana.distMeta() < arana.s * 1.1) { ruta.shift(); if (!ruta.length) { arana.parar(); const f = alTerminarRuta; alTerminarRuta = null; if (f) f(); ocioEn = (1.2 + Math.random() * 2.2) * LENTO; } }
+  } else if (cuelga) {
+    cuelga.t += dt;
+    if (cuelga.fase === 'baja' && arana.distMeta() < 2) { cuelga.fase = 'espera'; cuelga.t = 0; arana.parar(); }
+    else if (cuelga.fase === 'espera' && cuelga.t > 1.3) { cuelga.fase = 'sube'; arana.irA(cuelga.ancla.x, cuelga.ancla.y, 30); }
+    else if (cuelga.fase === 'sube' && arana.distMeta() < 2) { cuelga = null; arana.modo = 'andar'; arana.parar(); arana.plantar(); ocioEn = (1.5 + Math.random() * 2) * LENTO; }
+  } else if (descanso > 0) {
+    descanso -= dt;
+    if (arana.meta && arana.distMeta() < arana.s) arana.parar();
+    if (descanso <= 0) ocioEn = 0.2;
+  } else if (acicala > 0) {
+    acicala -= dt;
+    if (!reloj.quieto && Math.floor((acicala + dt) / 0.34) !== Math.floor(acicala / 0.34)) arana.gesto = 0.55;
+    if (acicala <= 0) ocioEn = (1.5 + Math.random() * 2.5) * LENTO;
+  } else if (!reloj.quieto) {
+    // nunca quieta más de unos segundos
+    ocioEn -= dt;
+    if (ocioEn <= 0) ocurrencia();
+  }
   arana.avanzar(dt);
 }
+
+/** Para depurar desde la consola: qué está haciendo la araña del Hilo. */
+export function depurar() { return { ruta: ruta.length, cuelga: cuelga ? cuelga.fase : null, descanso: +descanso.toFixed(2), acicala: +acicala.toFixed(2), ocioEn: +ocioEn.toFixed(2), roto: roto ? { k: +roto.k.toFixed(2), reparando: roto.reparando, cose: !!roto.cose } : null, meta: arana.meta ? arana.distMeta().toFixed(1) : null, vel: +arana.vel.toFixed(1), modo: arana.modo, s: +arana.s.toFixed(1) }; }

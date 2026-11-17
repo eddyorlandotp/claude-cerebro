@@ -21,6 +21,12 @@ export const estado = {
   ultimoEvento: 0,         // reloj.t del último evento que no sea latido
 };
 
+/**
+ * Lugares de la pantalla que otros módulos necesitan para apuntar (lanzar paquetes, mirar):
+ * cada módulo registra una función que devuelve { x, y } en px. Ej.: lugares.cara(), lugares.aranaHilo().
+ */
+export const lugares = {};
+
 const oyentes = new Map();
 
 /** Suscribirse: en('prompt', fn). Tipos internos extra: 'reinicio', 'conexion', 'paquete', 'cara'. */

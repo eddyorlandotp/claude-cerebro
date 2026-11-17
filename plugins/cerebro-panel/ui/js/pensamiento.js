@@ -1,17 +1,27 @@
-// pensamiento.js — la zona central: decide el estado de la cara a partir de los eventos,
-// escribe el pie ("leyendo  src/detector.ts" con su monito), las fichas de skills sugeridas,
-// las burbujas y las caritas de subagentes.
+// pensamiento.js — la zona central: decide el estado de la cara a partir de los eventos, escribe el
+// pie ("leyendo  src/detector.ts" con su monito), las fichas de skills sugeridas (del tono de su
+// cúmulo) y las burbujas. Alrededor de la cara gira la órbita (orbita.js) con las skills cargadas,
+// los archivos del turno y los subagentes.
+//
+// Vida en reposo: la cara echa vistazos a la araña o a un satélite; bosteza antes de dormirse;
+// dormida respira, y cada 3–6 min despierta un momento, suelta una frase (frases.js) y se vuelve
+// a dormir. Con ?reposo=1 esos tiempos van 20 veces más rápido (para probar).
 
-import { estado, en, emitir, nombreSkill } from './estado.js';
+import { estado, en, emitir, nombreSkill, lugares } from './estado.js';
 import { reloj, despues } from './reloj.js';
 import { dist, alCambiar } from './distribucion.js';
 import { capa, lienzo } from './lienzo.js';
 import { Cara } from './cara.js';
 import * as burbujas from './burbujas.js';
+import * as orbita from './orbita.js';
 import { MONITO } from './iconos.js';
-import { el, primeraOracion, truncar, truncarMedio, entraSale, limitar, COLOR, rgba, TAU } from './util.js';
+import { tonoSkill } from './tonos.js';
+import { frase } from './frases.js';
+import { el, primeraOracion, truncar, truncarMedio, limitar, rgba, TAU } from './util.js';
 
 export const cara = new Cara({ semilla: 3 });
+lugares.cara = () => ({ x: cara.x, y: cara.y, r: cara.d / 2 + cara.d * 0.075 + 6 });
+
 const zona = document.querySelector('#z-pensamiento .zona-int');
 const pieEstado = document.getElementById('pie-estado');
 const pieVerbo = document.getElementById('pie-verbo');
@@ -19,20 +29,27 @@ const pieObjeto = document.getElementById('pie-objeto');
 const pieVacio = document.getElementById('pie-vacio');
 const monito = document.getElementById('monito');
 const fichas = document.getElementById('fichas');
-const cajaSub = document.getElementById('subagentes');
 const meta = document.getElementById('pen-meta');
+const panel = document.getElementById('panel');
+
+const RAPIDO = new URLSearchParams(location.search).has('reposo') ? 20 : 1;     // ?reposo=1 acelera el reposo
+const INACTIVA = 120000 / RAPIDO;                                               // sin eventos este rato → se duerme
+const siesta = () => (180000 + Math.random() * 180000) / RAPIDO;                // dormida, despierta cada 3–6 min
 
 // ----- lo que sabe la zona -----
 const activas = new Map();      // herramientas en curso del hilo principal: id -> evento de inicio
-const subs = new Map();         // subagentes: id -> { cara, etq, x, y, fase, ... }
-const luces = [];               // puntos de luz que un subagente entrega a la cara
+const luces = [];               // anillos de luz cuando la cara recibe algo de un subagente
 let espera = null;              // motivo de espera o null
 let tropiezoHasta = 0, hablandoHasta = 0, pensandoHasta = 0;
-let estadoActual = '';
+let estadoActual = '', ultimoFallo = '';
+let sueno = 'no';               // 'no' | 'bostezo' | 'dormida' | 'despierta'
+let suenoHasta = 0, despertarEn = 0;
+let proximoVistazo = 4000;
+let puntos = null;              // burbuja "· · ·" cuando piensa sin texto
 
 const VERBO = {
-  dormida: 'dormida', atenta: 'lista', pensando: 'pensando', leyendo: 'leyendo', escribiendo: 'escribiendo',
-  ejecutando: 'ejecutando', delegando: 'delegando', hablando: 'respondiendo', esperando: 'esperándote', tropezo: 'tropezó',
+  dormida: 'dormida', bostezo: 'con sueño', despierta: 'despierta', atenta: 'lista', pensando: 'pensando', leyendo: 'leyendo',
+  escribiendo: 'escribiendo', ejecutando: 'ejecutando', delegando: 'delegando', hablando: 'respondiendo', esperando: 'esperándote', tropezo: 'tropezó',
 };
 const POR_CLASE = {
   leer: ['leyendo', 'leyendo', 'leer'], buscar: ['leyendo', 'buscando', 'buscar'], web: ['leyendo', 'consultando', 'web'],
@@ -41,20 +58,21 @@ const POR_CLASE = {
   tarea: ['escribiendo', 'anotando tareas', 'tarea'], pregunta: ['esperando', 'preguntándote', 'esperando'], otro: ['ejecutando', 'trabajando', 'otro'],
 };
 
-/** Geometría de la cara dentro de la zona: diámetro ≈ 18 % del alto, un poco por debajo del centro. */
+/** Geometría: la cara crece con su zona; la órbita ocupa los lados; el pie queda debajo de la órbita. */
 function geometria() {
   const r = dist.rects.pensamiento;
-  // escala del centro: 1 en una zona de ~780×720; crece con la zona (lo que más se lee de lejos es el pensamiento)
   const esc = limitar(Math.min(r.w / 780, r.h / 720), 1, 1.8);
-  const d = Math.round(limitar(Math.min(r.h * 0.21, r.w * 0.3), 64, 280));
-  const cx = r.w / 2, cy = Math.round(r.h * 0.56);
-  zona.style.setProperty('--esc', esc.toFixed(3));
-  burbujas.escalar(esc);
+  const d = Math.round(limitar(Math.min(r.h * 0.2, r.w * 0.28), 64, 270));
+  const cx = r.w / 2, cy = Math.round(r.h * 0.5);
   cara.x = r.x + cx; cara.y = r.y + cy; cara.d = d;
+  const base = parseFloat(getComputedStyle(document.documentElement).fontSize) || 14;
+  orbita.geometria(cara.x, cara.y, d, { x: r.x, y: r.y, w: r.w, h: r.h }, Math.round(base * 0.84 * (0.5 + 0.5 * esc)));
   zona.style.setProperty('--cara-x', cx + 'px');
   zona.style.setProperty('--cara-y', cy + 'px');
   zona.style.setProperty('--cara-d', d + 'px');
-  colocarSubs(true);
+  zona.style.setProperty('--orbita', Math.round(orbita.fondo()) + 'px');
+  zona.style.setProperty('--esc', esc.toFixed(3));
+  burbujas.escalar(esc);
 }
 
 /** Recalcula en qué estado debe estar la cara. Se llama tras cada evento y cuando vence un plazo. */
@@ -62,29 +80,45 @@ function recalcular() {
   const t = reloj.t;
   let e, verbo, objeto = '', icono = null, tono = '';
   const ultima = [...activas.values()].pop();
-  if (!estado.sesion || espera === 'inactivo') { e = 'dormida'; }
+  const sub = orbita.subActivo();
+  const inactiva = !estado.enTurno && espera !== 'permiso' && t - estado.ultimoEvento > INACTIVA;
+  if (!estado.sesion || espera === 'inactivo' || (inactiva && !ultima)) { e = 'dormida'; }
   else if (t < tropiezoHasta) { e = 'tropezo'; icono = 'tropezo'; tono = 'rosa'; objeto = ultimoFallo; }
   else if (espera) {
     e = 'esperando'; icono = 'esperando'; tono = 'ambar';
-    objeto = espera === 'permiso' ? 'necesito tu permiso' : espera === 'respuesta' ? 'te toca responder' : 'sin actividad';
+    objeto = espera === 'permiso' ? 'necesito tu permiso' : 'te toca responder';
   }
   else if (ultima) {
     const [est, v, ic] = POR_CLASE[ultima.clase] || POR_CLASE.otro;
     e = est; verbo = v; icono = ic; objeto = ultima.clase === 'skill' ? nombreSkill(ultima.resumen) : ultima.resumen || ultima.nombre;
   }
   else if (t < hablandoHasta) { e = 'hablando'; icono = 'hablando'; }
-  else if ([...subs.values()].some((s) => s.fase === 'vivo') && estado.enTurno && t >= pensandoHasta) {
-    e = 'delegando'; icono = 'agente';
-    const s = [...subs.values()].filter((x) => x.fase === 'vivo').pop();
-    objeto = s.tipo; cara.mirada = s;
-  }
+  else if (sub && estado.enTurno && t >= pensandoHasta) { e = 'delegando'; icono = 'agente'; objeto = sub.nombre; }
   else if (estado.enTurno) { e = 'pensando'; icono = 'pensando'; }
-  else if (t - estado.ultimoEvento > 120000) { e = 'dormida'; }
   else { e = 'atenta'; }
+  if (e === 'delegando') cara.mirada = sub;
 
-  if (e === 'delegando' && ultima) { const s = [...subs.values()].filter((x) => x.fase === 'vivo').pop(); if (s) cara.mirada = s; }
+  // el sueño tiene sus propias fases: bosteza, duerme, y a ratos despierta un momento
+  if (e === 'dormida') {
+    if (sueno === 'no') {
+      burbujas.quitarTipo('toca');      // dormida nunca queda nada en ámbar
+      if (cara.estado === 'dormida' || reloj.rapido) { sueno = 'dormida'; despertarEn = t + siesta(); }
+      else { sueno = 'bostezo'; suenoHasta = t + 1600; }
+    }
+    if (sueno === 'bostezo' && t >= suenoHasta) { sueno = 'dormida'; despertarEn = t + siesta(); }
+    if (sueno === 'dormida' && t >= despertarEn && !reloj.rapido && !reloj.quieto) {
+      // despierta un momento, mira al frente y suelta una frase (nunca en ámbar)
+      sueno = 'despierta'; suenoHasta = t + 4200 * (RAPIDO > 1 ? 0.8 : 1);
+      burbujas.limpiar();
+      burbujas.agregar('frase', frase(estado.sesion ? 'reposo' : 'sinSesion'));
+    }
+    if (sueno === 'despierta' && t >= suenoHasta) { sueno = 'bostezo'; suenoHasta = t + 1600; burbujas.quitarTipo('frase'); }
+    e = sueno;
+    tono = 'apagado';
+  } else if (sueno !== 'no') { sueno = 'no'; burbujas.quitarTipo('frase'); }
+
   cara.poner(e);
-  if (e === 'dormida') tono = 'apagado';
+  if (e !== 'pensando' && puntos) quitarPuntos();
   const clave = e + '|' + (verbo || '') + '|' + objeto + '|' + icono;
   if (clave === estadoActual) return;
   estadoActual = clave;
@@ -96,49 +130,29 @@ function recalcular() {
   pieObjeto.textContent = objeto ? truncarMedio(objeto, 56) : '';
   monito.innerHTML = icono ? MONITO[icono] || '' : '';
   meta.textContent = sinSesion ? '' : estado.enTurno ? 'turno ' + estado.turno : estado.turno ? 'turno ' + estado.turno + ' terminado' : 'esperando tu primer mensaje';
-  emitir('cara', { estado: e, verbo: verbo || VERBO[e], tono: tono || (e === 'atenta' ? '' : '') });
+  emitir('cara', { estado: e, verbo: verbo || VERBO[e] });
 }
-let ultimoFallo = '';
+function quitarPuntos() { burbujas.quitarTipo('puntos'); puntos = null; }
 
 // ----- fichas de skills sugeridas (aparecen cuando la araña entrega cada paquete) -----
 function pintarFichas() {
   fichas.textContent = '';
-  const entregadas = estado.sugeridas.filter((s) => s.entregada);
+  const entregadas = estado.sugeridas.filter((s) => s.entregada && !s.devuelta);
   if (!entregadas.length) return;
   fichas.append(el('span', 'fichas-rotulo', 'skills que trajo la araña'));
   for (const s of entregadas) {
     const f = el('span', 'ficha' + (estado.usadas.has(s.id) ? ' usada' : '') + (s.apagada ? ' apagada' : ''), nombreSkill(s.id));
     f.dataset.id = s.id;
+    if (!s.apagada) f.style.setProperty('--tono', tonoSkill(s.id).hex);      // el tono del cúmulo viaja con la skill
     if (s.vista) f.style.animation = 'none';
     s.vista = true;
     fichas.append(f);
   }
-  colocarSubs();
-}
-
-// ----- subagentes -----
-// Cada subagente tiene un renglón en el pie (DOM) con un hueco; la carita se dibuja en el
-// lienzo sobre ese hueco. Nace en la cara principal y viaja a su sitio.
-function colocarSubs(yaMismo = false) {
-  for (const s of subs.values()) {
-    if (s.fase !== 'vivo') continue;
-    const r = s.hueco.getBoundingClientRect();
-    if (!r.width) continue;
-    s.mx = r.left + r.width / 2; s.my = r.top + r.height / 2; s.cara.d = r.width;
-    if (yaMismo) { s.x = s.mx; s.y = s.my; }
-  }
-}
-function etiquetaSub(s) {
-  s.txt.textContent = '';
-  const linea = el('span'); linea.append(el('b', '', s.tipo), document.createTextNode(' · ' + s.descripcion));
-  s.txt.append(linea, el('span', 'nota', s.nota || 'empezando…'));
 }
 
 // ----- eventos -----
 en('reinicio', () => {
-  activas.clear(); espera = null; tropiezoHasta = hablandoHasta = pensandoHasta = 0; estadoActual = '';
-  for (const s of subs.values()) s.etq.remove();
-  subs.clear(); luces.length = 0;
+  activas.clear(); espera = null; tropiezoHasta = hablandoHasta = pensandoHasta = 0; estadoActual = ''; luces.length = 0; puntos = null;
   burbujas.limpiar(true); fichas.textContent = '';
   cara.contexto = estado.uso ? estado.uso.contexto / (estado.uso.ventana || 200000) : 0;
   recalcular();
@@ -146,17 +160,23 @@ en('reinicio', () => {
 en('sesion', () => { if (espera === 'inactivo') espera = null; recalcular(); });
 en('prompt', (ev) => {
   if (ev.enCola) { cara.parpadear(0.1); return; }
-  activas.clear(); espera = null; hablandoHasta = 0; tropiezoHasta = 0;
+  activas.clear(); espera = null; hablandoHasta = 0; tropiezoHasta = 0; pensandoHasta = 0; puntos = null;
   burbujas.limpiar(); fichas.textContent = '';
   cara.poner('atenta'); cara.parpadear(0.1);
-  pensandoHasta = 0;
   recalcular();
 });
 en('paquete', ({ id }) => {
   const s = estado.sugeridas.find((x) => x.id === id);
   if (s) s.entregada = true;
-  cara.recibir('cian');
+  cara.recibir(s && !s.apagada ? tonoSkill(id).hex : 'cian');
   pintarFichas();
+});
+// fin de turno: la araña recoge las sugerencias que no se usaron
+en('devuelta', ({ id }) => {
+  const s = estado.sugeridas.find((x) => x.id === id);
+  if (s) s.devuelta = true;
+  const f = [...fichas.children].find((x) => x.dataset && x.dataset.id === id);
+  if (f && !reloj.rapido) { f.classList.add('devuelta'); setTimeout(pintarFichas, 220); } else pintarFichas();
 });
 en('skill_usada', (ev) => {
   // puede usar una skill que la araña no sugirió: igual se muestra
@@ -164,39 +184,30 @@ en('skill_usada', (ev) => {
   pintarFichas();
 });
 en('pensamiento', (ev) => {
+  if (ev.agente) return;
   espera = null;
-  if (ev.agente) {
-    const s = subs.get(ev.agente);
-    if (s) { s.nota = primeraOracion(ev.texto, 60); s.cara.poner('pensando'); etiquetaSub(s); }
-    return;
-  }
   burbujas.quitarTipo('toca');
   const texto = primeraOracion(ev.texto, 92);
-  if (texto) burbujas.agregar('pensamiento', texto);      // puede llegar vacío: piensa sin burbuja
+  if (texto) { quitarPuntos(); burbujas.agregar('pensamiento', texto); }
+  // casi siempre llega vacío: piensa con una nubecita de puntos en vez de dejar el centro mudo
+  else if (!puntos) puntos = burbujas.agregar('puntos', '· · ·');
   pensandoHasta = reloj.t + 2500;
   recalcular();
 });
 en('dicho', (ev) => {
+  if (ev.agente) return;
   espera = null;
-  if (ev.agente) { const s = subs.get(ev.agente); if (s) { s.nota = primeraOracion(ev.texto, 60); etiquetaSub(s); } return; }
   burbujas.quitarTipo('toca');
   const texto = String(ev.texto || '').trim();
   if (!texto) return;
+  quitarPuntos();
   burbujas.agregar('dicho', truncar(texto, 170));
   hablandoHasta = reloj.t + limitar(texto.length * 45, 1800, 5000);
   despues(hablandoHasta - reloj.t + 10, recalcular);
   recalcular();
 });
 en('herramienta', (ev) => {
-  if (ev.agente) {
-    const s = subs.get(ev.agente);
-    if (s) {
-      if (ev.fase === 'inicio') { s.nota = (ev.clase || '') + ' ' + truncarMedio(ev.resumen || ev.nombre || '', 40); s.cara.poner((POR_CLASE[ev.clase] || POR_CLASE.otro)[0]); }
-      else { s.cara.poner(ev.ok === false ? 'tropezo' : 'pensando'); }
-      etiquetaSub(s);
-    }
-    return;
-  }
+  if (ev.agente) return;
   if (ev.fase === 'inicio') { espera = null; burbujas.quitarTipo('toca'); activas.set(ev.id, ev); }
   else {
     const ini = activas.get(ev.id);
@@ -210,27 +221,9 @@ en('herramienta', (ev) => {
   }
   recalcular();
 });
-en('subagente', (ev) => {
-  if (ev.fase === 'inicio') {
-    const previo = subs.get(ev.id);
-    if (previo && previo.fase === 'vivo') return;
-    if (previo) previo.etq.remove();      // se había ido y lo reanudaron: sale de nuevo
-    const s = {
-      id: ev.id, tipo: ev.tipoAgente || 'agente', descripcion: ev.descripcion || '', nota: '',
-      cara: new Cara({ mini: true, semilla: subs.size + 5 }), etq: el('div', 'sub-etq'), hueco: el('i', 'sub-cara'), txt: el('div', 'sub-txt'),
-      x: cara.x, y: cara.y, mx: cara.x, my: cara.y, fase: 'vivo', k: 0, nuevo: false, alfa: 0,
-    };
-    s.cara.poner('atenta');
-    s.etq.append(s.hueco, s.txt);
-    cajaSub.append(s.etq); etiquetaSub(s);
-    subs.set(ev.id, s);
-    colocarSubs();
-  } else {
-    const s = subs.get(ev.id);
-    if (s && s.fase === 'vivo') { s.fase = 'vuelve'; s.k = 0; s.x0 = s.x; s.y0 = s.y; s.etq.classList.add('sale'); }
-  }
-  recalcular();
-});
+en('subagente', () => recalcular());
+// el subagente que termina viaja a la cara y le entrega un punto de luz
+en('sub-entrega', () => { cara.recibir('cian'); luces.push({ k: 0 }); recalcular(); });
 en('espera', (ev) => {
   espera = ev.motivo || 'respuesta';
   burbujas.quitarTipo('toca');
@@ -250,56 +243,37 @@ export function iniciar() {
   alCambiar(() => { geometria(); burbujas.redibujar(); });
   geometria();
   recalcular();
-
+  // la órbita tiene profundidad: su mitad de atrás va antes que la cara y la de adelante, después
+  capa(58, (ctx) => orbita.dibujarAtras(ctx));
   capa(60, (ctx) => {
-    // caritas de subagentes y los puntos de luz que entregan
-    for (const s of subs.values()) {
-      if (s.fase === 'ido') continue;
-      s.cara.x = s.x; s.cara.y = s.y; s.cara.alfa = s.alfa;
-      s.cara.dibujar(ctx);
-    }
     for (const l of luces) {
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = rgba('cian', 0.9 * (1 - l.k));
-      ctx.beginPath(); ctx.arc(cara.x, cara.y, cara.d / 2 + cara.d * 0.075 + l.k * 26, 0, TAU);
-      ctx.strokeStyle = rgba('cian', 0.8 * (1 - l.k)); ctx.lineWidth = 1; ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = rgba('cian', 0.8 * (1 - l.k)); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cara.x, cara.y, cara.d / 2 + cara.d * 0.075 + l.k * 26, 0, TAU); ctx.stroke();
     }
     cara.dibujar(ctx);
   });
+  capa(62, (ctx) => orbita.dibujarFrente(ctx));
 }
 
 let ultimaRevision = 0, dormidaPuesta = false;
 export function avanzar(dt) {
   cara.avanzar(dt);
-  // brillo general: dormida baja a 60 %
-  const metaBrillo = cara.estado === 'dormida' ? 0.6 : 1;
+  orbita.avanzar(dt);
+  // brillo general: dormida baja a 60 % (despierta un momento = vuelve la luz)
+  const metaBrillo = cara.estado === 'dormida' ? 0.6 : cara.estado === 'bostezo' ? 0.8 : 1;
   lienzo.brillo += (metaBrillo - lienzo.brillo) * Math.min(1, dt * 2.5);
-  if (dormidaPuesta !== (metaBrillo < 1)) { dormidaPuesta = metaBrillo < 1; document.getElementById('panel').classList.toggle('dormida', dormidaPuesta); }
-  // plazos que vencen sin evento (hablando, pensando → delegando, inactividad)
-  if (reloj.t - ultimaRevision > 400) { ultimaRevision = reloj.t; recalcular(); }
-
-  for (const s of subs.values()) {
-    if (s.fase === 'vivo') {
-      s.alfa = Math.min(1, s.alfa + dt * 5);
-      s.x += (s.mx - s.x) * Math.min(1, dt * 7); s.y += (s.my - s.y) * Math.min(1, dt * 7);
-    } else if (s.fase === 'vuelve') {
-      // viaja hasta la cara principal, entrega un punto de luz y desaparece
-      s.k = Math.min(1, s.k + dt / 0.6);
-      const e = entraSale(s.k);
-      s.x = s.x0 + (cara.x - s.x0) * e; s.y = s.y0 + (cara.y - s.y0) * e;
-      s.cara.d = Math.max(6, cara.d * 0.3 * (1 - e * 0.75));
-      s.alfa = 1 - Math.max(0, (s.k - 0.75) * 4);
-      if (s.k >= 1) { s.fase = 'ido'; s.etq.remove(); cara.recibir('cian'); luces.push({ k: 0 }); subs.delete(s.id); colocarSubs(); recalcular(); }
-      else if (s.k > 0.5 && s.etq.isConnected) { s.etq.remove(); colocarSubs(); }
+  if (dormidaPuesta !== (metaBrillo < 0.7)) { dormidaPuesta = metaBrillo < 0.7; panel.classList.toggle('dormida', dormidaPuesta); }
+  // plazos que vencen sin evento (hablando, pensando → delegando, inactividad, sueño)
+  if (reloj.t - ultimaRevision > 250) { ultimaRevision = reloj.t; recalcular(); }
+  // vistazos: de vez en cuando mira a la araña que pasa o a un satélite
+  if (reloj.t > proximoVistazo && !reloj.rapido) {
+    proximoVistazo = reloj.t + (5000 + Math.random() * 5000) / (RAPIDO > 1 ? 3 : 1);
+    if (cara.estado === 'atenta' || cara.estado === 'pensando') {
+      const p = (Math.random() < 0.5 && orbita.alguno()) || (lugares.aranaBib && lugares.aranaBib());
+      if (p) cara.vistazo = { x: p.x, y: p.y, hasta: reloj.t + 1100 + Math.random() * 700 };
     }
-    s.cara.avanzar(dt);
   }
   for (let i = luces.length - 1; i >= 0; i--) { luces[i].k += dt / 0.5; if (luces[i].k >= 1) luces.splice(i, 1); }
 }
 /** Tras avanzar en seco (?t=), recolocar lo que depende del DOM. */
-export function asentar() {
-  colocarSubs(true);
-  for (const s of subs.values()) if (s.fase === 'vivo') s.alfa = 1;
-  burbujas.redibujar();
-}
+export function asentar() { pintarFichas(); burbujas.redibujar(); estadoActual = ''; recalcular(); }

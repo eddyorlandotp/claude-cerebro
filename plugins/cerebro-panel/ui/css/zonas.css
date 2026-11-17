@@ -35,10 +35,17 @@
 .burbuja.dicho svg path { stroke: var(--tinta-2); }
 .burbuja.toca { color: var(--ambar); font-weight: 500; }
 .burbuja.toca svg path { stroke: var(--ambar); }
+/* Frase de reposo (la cara despierta un momento): sobria, nunca en ámbar. */
+.burbuja.frase { color: var(--tinta-2); }
+.burbuja.frase svg path { stroke: var(--tinta-3); }
+/* Piensa sin texto: nubecita con tres puntos que laten. */
+.burbuja.puntos { color: var(--cian); font-weight: 600; letter-spacing: 0.1em; padding: calc(7px * var(--esc)) calc(18px * var(--esc)); }
+.burbuja.puntos span { animation: m-late 1400ms steps(1) infinite; }
+@keyframes m-late { 0% { opacity: 1; } 50% { opacity: 0.45; } }
 
 .pie {
   position: absolute; left: 0; right: 0;
-  top: calc(var(--cara-y) + var(--cara-d) * 0.5 + 30px * var(--esc));
+  top: calc(var(--cara-y) + var(--orbita, var(--cara-d) * 0.5) + 14px * var(--esc));      /* debajo de la órbita */
   display: flex; flex-direction: column; align-items: center; gap: calc(14px * var(--esc));
   padding: 0 var(--lado);
 }
@@ -73,29 +80,16 @@
 .fichas { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; max-width: min(72ch, 100%); min-height: 24px; }
 .fichas-rotulo { flex-basis: 100%; text-align: center; font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-3); margin-bottom: 2px; }
 .ficha {
-  border: 1px solid var(--cian); color: var(--cian); background: var(--fondo);
+  --tono: var(--cian);      /* el tono del cúmulo de origen (lo pone pensamiento.js) */
+  border: 1px solid var(--tono); color: var(--tono); background: var(--fondo);
   padding: 2px 8px; font-size: calc(0.82rem * (0.4 + 0.6 * var(--esc))); line-height: 1.4; white-space: nowrap;
   animation: entra 220ms var(--sale) both;
 }
-.ficha.usada { background: var(--cian); color: var(--fondo); font-weight: 500; }
+.ficha.usada { background: var(--tono); color: var(--fondo); font-weight: 500; }
+.ficha.devuelta { opacity: 0; transition: opacity 200ms linear; }
 .ficha.apagada { border-color: var(--ambar); color: var(--ambar); }
 .ficha.apagada::after { content: " · apagada"; }
 @keyframes entra { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
-
-/* Subagentes: fila bajo las fichas. La carita se dibuja en el lienzo sobre el hueco .sub-cara. */
-.subagentes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; max-width: 100%; }
-.subagentes:empty { display: none; }
-.sub-etq {
-  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center;
-  max-width: 54ch; font-size: calc(0.82rem * (0.4 + 0.6 * var(--esc))); line-height: 1.35; color: var(--tinta-2);
-  transition: opacity 160ms linear; animation: entra 220ms var(--sale) both;
-}
-.sub-cara { width: max(24px, calc(var(--cara-d) * 0.3)); aspect-ratio: 1; }
-.sub-txt { min-width: 0; background: var(--fondo); padding: 2px 8px 2px 0; }   /* el fondo va solo en el texto: la carita se dibuja debajo, en el lienzo */
-.sub-txt > * { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sub-txt b { font-weight: 500; color: var(--tinta); }
-.sub-txt .nota { color: var(--tinta-3); }
-.sub-etq.sale { opacity: 0; }
 
 /* ---------- Contexto ---------------------------------------------------------- */
 .ctx { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: clamp(8px, 2.2vh, 28px); padding-top: 8px; }
@@ -129,7 +123,7 @@
 
 /* ---------- Hilo ------------------------------------------------------------- */
 .hilo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; padding-top: 8px; }
-.hilo-texto { min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 7px; font-size: 0.9rem; }
+.hilo-texto { min-width: 0; overflow: hidden; font-size: 0.9rem; }
 .hilo-tela { min-width: 0; }   /* hueco reservado: la telaraña se dibuja en el lienzo */
 .hilo-fila { display: grid; grid-template-columns: 9.5ch minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
 .hilo-fila > dt { font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-3); }
@@ -149,7 +143,9 @@
 .hilo-lista .en-curso .caja { border-color: var(--cian); }
 .hilo-lista .en-curso .caja::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: 3px; background: var(--cian); }
 .hilo-fila.error > dt, .hilo-fila.error > dd { color: var(--rosa); }
-.hilo dl { margin: 0; display: contents; }
+/* Solo filas completas: la que no cabe salta a una columna que queda fuera (oculta). */
+.hilo dl { margin: 0; height: 100%; display: flex; flex-flow: column wrap; align-content: flex-start; gap: 7px 60px; }
+.hilo-fila { width: 100%; flex: none; }
 
 /* ---------- Actividad -------------------------------------------------------- */
 .registro { flex: 1; min-height: 0; overflow: hidden; margin-top: 8px; font-size: 0.88rem; line-height: 1.62; display: flex; flex-flow: column wrap; align-content: flex-start; column-gap: 40px; }
@@ -160,13 +156,53 @@
 .registro .cola { color: var(--tinta-3); }
 .registro li.tenue .detalle { color: var(--tinta-2); }
 .registro li.curso .verbo { color: var(--cian); }
+.registro li[style*="--tono"] .verbo { color: var(--tono); }
 .registro li.error .verbo, .registro li.error .detalle { color: var(--rosa); }
 .registro li.espera .verbo, .registro li.espera .detalle { color: var(--ambar); }
 .registro li.sub .detalle::before { content: "└ "; color: var(--tinta-3); }
 
 /* ---------- Flujo ------------------------------------------------------------ */
 .flujo-previos { font-size: 0.8rem; color: var(--tinta-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.flujo { flex: 1; min-height: 0; position: relative; padding-top: 14px; display: flex; flex-direction: column; gap: 18px; }
+.flujo { flex: 1; min-height: 0; position: relative; padding-top: 22px; display: flex; flex-direction: column; }      /* 22 px: sitio para la araña del Flujo sobre los bloques */
+.flujo-pasos { flex: none; display: flex; flex-direction: column; gap: 18px; }
+/* Pocos bloques: crecen (más anchos, resumen completo) en vez de dejar hueco. */
+.flujo.grande .bloque { font-size: 0.95rem; }
+.flujo.grande .bloque-res { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; min-height: 2.9em; padding-bottom: 5px; }
+.flujo.grande .bloque-res.dos { -webkit-line-clamp: 4; min-height: 4.3em; }
+
+/* Regla de tiempo: cada paso a escala sobre la duración del turno; los huecos son tiempo pensando. */
+.regla { flex: none; margin-top: 14px; }
+.regla[hidden] { display: none; }
+.regla-barra { position: relative; height: 7px; border-bottom: 1px solid var(--linea-2); border-left: 1px solid var(--linea-2); border-right: 1px solid var(--linea-2); }
+.regla-barra i { position: absolute; top: 0; height: 4px; min-width: 2px; background: var(--tinta-3); }
+.regla-barra i.cambio { background: var(--tinta-2); }
+.regla-barra i.curso { background: var(--cian); }
+.regla-barra i.espera { background: var(--ambar); }
+.regla-barra i.fallo { background: var(--rosa); }
+.regla-pie { position: relative; display: flex; justify-content: space-between; font-size: 0.74rem; line-height: 1.7; color: var(--tinta-3); white-space: nowrap; }
+.regla-mayor { position: absolute; top: 0; transform: translateX(-50%); color: var(--tinta-2); }
+.regla-mayor.fallo { color: var(--rosa); }
+
+/* Historia: una tira de celdas por turno terminado (el más reciente arriba). Solo renglones completos. */
+.historia { flex: 1; min-height: 0; margin-top: 8px; overflow: hidden; display: flex; flex-flow: column wrap; align-content: flex-start; column-gap: 80px; }
+.hist-fila {
+  width: 100%; flex: none; height: 1.6rem;
+  display: grid; grid-template-columns: 7.5ch auto auto minmax(0, 1fr); column-gap: 14px; align-items: center;
+  font-size: 0.8rem; color: var(--tinta-3); white-space: nowrap;
+}
+.hist-fila.nueva { animation: cosida 700ms var(--sale) both; }
+@keyframes cosida { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.hist-turno { font-family: var(--cond); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.hist-celdas { display: flex; align-items: center; gap: 2px; }
+.hist-celdas i { height: 9px; background: var(--tinta-3); }
+.hist-celdas i.c-editar { background: var(--cian); }
+.hist-celdas i.c-comando, .hist-celdas i.c-mcp { background: var(--cian-tenue); }
+.hist-celdas i.c-agente { background: none; border: 1px solid var(--tinta-2); }
+.hist-celdas i.c-arana { background: none; border: 1px solid var(--cian-tenue); }
+.hist-celdas i.fallo { background: var(--rosa); border: 0; }
+.hist-dato { color: var(--tinta-2); }
+.hist-texto { overflow: hidden; text-overflow: ellipsis; }
+.hist-vacia { font-size: 0.8rem; color: var(--tinta-3); line-height: 1.6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 /* Un renglón = fila principal + fila de subagentes. En vertical hay dos renglones. */
 .renglon { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); column-gap: 30px; row-gap: 16px; grid-auto-rows: min-content; }
 .bloque {
@@ -188,6 +224,9 @@
 .bloque-dat { padding: 0 8px 5px; color: var(--tinta-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.4em; }
 .bloque.sub .bloque-res { padding-top: 3px; } .bloque.sub .bloque-dat { padding-bottom: 3px; }
 
+/* Bloque de skill: filo superior del tono de su cúmulo. */
+.bloque.con-tono { border-top: 2px solid var(--tono); }
+.bloque.con-tono .bloque-clase { color: var(--tono); }
 .bloque.curso { border-color: var(--cian); }
 .bloque.curso .bloque-cab { border-bottom-color: var(--cian-tenue); }
 .bloque.curso .bloque-clase { color: var(--cian); }

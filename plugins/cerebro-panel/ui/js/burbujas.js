@@ -77,14 +77,15 @@ function dibujarContorno(b) {
   }
 }
 
-/** Agrega una burbuja. tipo: 'pensamiento' | 'dicho' | 'toca' */
+/** Agrega una burbuja. tipo: 'pensamiento' | 'puntos' (piensa sin texto) | 'dicho' | 'toca' (ámbar) | 'frase' (reposo) */
 export function agregar(tipo, texto) {
   // FLIP: recordar dónde estaban las viejas para que "suban" con transform
   const antes = new Map(lista.map((b) => [b, b.el.getBoundingClientRect().top]));
   cuenta += 1;
   const b = {
-    tipo: tipo === 'toca' ? 'dicho' : tipo, semilla: 31 + cuenta * 7919,
-    el: el('div', 'burbuja' + (tipo === 'pensamiento' ? '' : ' dicho') + (tipo === 'toca' ? ' toca' : '')),
+    // forma: nube (pensamiento, puntos) o rectángulo con pico (dicho, toca, frase)
+    tipo: tipo === 'pensamiento' || tipo === 'puntos' ? 'pensamiento' : 'dicho', semilla: 31 + cuenta * 7919,
+    el: el('div', 'burbuja' + (tipo === 'pensamiento' ? '' : tipo === 'puntos' ? ' puntos' : ' dicho' + (tipo === 'dicho' ? '' : ' ' + tipo))),
     svg: document.createElementNS(NS, 'svg'), dx: 0,
   };
   // las nubes alternan lado para que se lean como cascada; lo dicho va centrado

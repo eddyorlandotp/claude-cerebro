@@ -107,14 +107,17 @@ function aplicar() {
     // Filas: barra · contexto · hilo · actividad · flujo (26 % del alto útil).
     const util = H - BARRA - franja;
     const base = parseFloat(getComputedStyle(document.documentElement).fontSize) || 14;
-    const flujo = m('flujo') ? 0 : Math.round(Math.min(util * 0.26, base * 13.2 + 84));
+    const flujo = m('flujo') ? 0 : Math.round(Math.max(util * 0.27, Math.min(util * 0.34, base * 21 + 70)));      // bloques + regla de tiempo + historia
     const cuerpo = repartir(util - flujo, derechaFuera ? [1, 1, 1] : [m('contexto') ? 0 : 28, m('hilo') ? 0 : 36, m('actividad') ? 0 : 36]);
     filas = [BARRA, franja, ...cuerpo, flujo];
   } else {
-    // Vertical: pensamiento 34 · biblioteca 24 · flujo 16 · contexto+hilo 14 · actividad el resto.
+    // Vertical: pensamiento 34 · biblioteca 24 · flujo 19 (bloques + regla + historia) · contexto+hilo 14 · actividad el resto.
     const util = H - BARRA - franja;
-    const pesos = [34, m('biblioteca') ? 0 : 24, m('flujo') ? 0 : 16, m('contexto') && m('hilo') ? 0 : 14, m('actividad') ? 0 : 12];
-    filas = [BARRA, franja, ...repartir(util, pesos)];
+    const pesos = [34, m('biblioteca') ? 0 : 24, m('flujo') ? 0 : 19, m('contexto') && m('hilo') ? 0 : 14, m('actividad') ? 0 : 10];
+    const alto = repartir(util, pesos);
+    // lo que libera una zona minimizada se lo queda Pensamiento: Flujo y Contexto/Hilo no crecen de más (quedarían huecos)
+    for (const [i, tope] of [[2, 0.2], [3, 0.15]]) { const max = Math.round(util * tope); if (alto[i] > max) { alto[0] += alto[i] - max; alto[i] = max; } }
+    filas = [BARRA, franja, ...alto];
     const mitad = Math.round(W / 2);
     cols = m('contexto') && !m('hilo') ? [0, W] : m('hilo') && !m('contexto') ? [W, 0] : [mitad, W - mitad];
   }
