@@ -176,7 +176,7 @@ sudo pacman -S --needed typescript-language-server pyright nodejs npm ffmpeg git
    - que escriba **`/reload-plugins`** (o reinicie Claude Code) para activarlos, y `/mcp` para ver los servidores MCP;
    - en qué modo quedó (ligero o completo) y los tokens fijos por mensaje;
    - que para ver el panel escriba `/cerebro-panel:abrir-panel` después de reiniciar;
-   - una línea: en cada proyecto puede correr `/cerebro-base:dieta-de-contexto` para prender ahí solo lo que ese proyecto usa.
+   - una línea, según el modo: en **modo completo**, que en cada proyecto puede correr `/cerebro-base:dieta-de-contexto` para dejar prendido solo lo que ese proyecto usa; en **modo ligero** ese comando no existe (cerebro-base queda apagado): ahí basta con pedirlo en palabras, por ejemplo "prende en este proyecto el plugin de Solana", y tú corres `claude plugin enable <plugin>@<marketplace> --scope local`.
 
 ## Después de reiniciar: probar Telaraña en esta máquina
 
