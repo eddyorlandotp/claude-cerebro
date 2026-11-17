@@ -60,3 +60,15 @@ test('recortar y descCorta respetan el máximo', () => {
 test('las stopwords cubren saludos y muletillas', () => {
   for (const p of ['hola', 'gracias', 'porfa', 'the', 'quiero']) assert.ok(STOPWORDS.has(p), p);
 });
+
+test('"copias de documentación" es sustantivo: no comparte raíz con copiar operaciones', async () => {
+  const { terminos, raiz } = await import('../lib/texto.mjs');
+  const copiar = raiz('copiar');
+  for (const frase of ['copias locales de documentación', 'haz una copia de seguridad', 'copias de la documentación']) {
+    assert.ok(!terminos(frase).includes(copiar), frase);
+    assert.ok(terminos(frase).includes(raiz('respaldo')), frase);
+  }
+  // el verbo sigue funcionando
+  assert.ok(terminos('el bot tarda en copiar las compras').includes(copiar));
+  assert.ok(terminos('copia al trader').includes(copiar));
+});

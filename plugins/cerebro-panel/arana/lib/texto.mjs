@@ -74,7 +74,12 @@ export function tokenizar(texto) {
 }
 
 /** Palabras útiles de un texto, ya en raíz: sin stopwords, sin números sueltos, sin letras sueltas. */
+// "copia/copias" como sustantivo (copias de documentación, copia de seguridad, copias locales) no es
+// "copiar" operaciones: se reescribe a respaldo/espejo antes de sacar raíces, para que no jale copy trading.
+const COPIA_SUSTANTIVO = /\bcopias?\s+(locales?|de\s+(seguridad|respaldo|documentacion|docs|archivos?|datos|la|las|los|mis?|tus?|sus?|el))\b/g;
+
 export function terminos(texto) {
+  texto = normalizar(texto).replace(COPIA_SUSTANTIVO, 'respaldo espejo $1');
   const salida = [];
   for (const t of tokenizar(texto)) {
     if (t.length < 2 || STOPWORDS.has(t) || /^\d+$/.test(t)) continue;
