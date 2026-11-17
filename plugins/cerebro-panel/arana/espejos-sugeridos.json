@@ -1,20 +1,20 @@
 {
-  "nota": "Repos públicos de documentación comprobados con `git ls-remote <url> HEAD` (nov 2026). `solo` limita la copia a esas carpetas (clon parcial) para no bajar un monorepo entero. `tamano` es lo medido en disco con clon superficial en esa fecha; los que dicen 'no medido' son repos grandes que no se descargaron al preparar esta lista.",
+  "nota": "Repos públicos de documentación comprobados con `git ls-remote <url> HEAD` (nov 2026). `solo` limita la copia a esas carpetas (clon parcial) para no bajar un monorepo entero. `tamano` es lo medido en disco (`du`) con clon superficial en la máquina del usuario, nov 2026; los 15 juntos ocupan ~1.2 GB.",
   "espejos": [
-    { "nombre": "solana", "url": "https://github.com/solana-foundation/solana-com", "solo": ["apps/docs"], "tamano": "no medido", "tema": "Documentación oficial de Solana (solana.com/docs); solo la carpeta apps/docs (~9,800 archivos de texto)" },
-    { "nombre": "jupiter", "url": "https://github.com/jup-ag/docs", "tamano": "~97 MB", "tema": "Documentación de Jupiter: Swap API, comisiones de integrador, referencia de API" },
+    { "nombre": "solana", "url": "https://github.com/solana-foundation/solana-com", "solo": ["apps/docs"], "tamano": "~322 MB", "tema": "Documentación oficial de Solana (solana.com/docs); solo la carpeta apps/docs (~9,800 archivos de texto)" },
+    { "nombre": "jupiter", "url": "https://github.com/jup-ag/docs", "tamano": "~96 MB", "tema": "Documentación de Jupiter: Swap API, comisiones de integrador, referencia de API" },
     { "nombre": "helius", "url": "https://github.com/helius-labs/core-ai", "tamano": "~10 MB", "tema": "Repo oficial de Helius para agentes: skills, CLI y MCP con sus guías (Helius no publica su sitio de docs como repo)" },
     { "nombre": "jito", "url": "https://github.com/jito-labs/jito-docs", "tamano": "~2 MB", "tema": "Documentación de Jito: bundles, tips y envío de transacciones" },
     { "nombre": "phantom", "url": "https://github.com/phantom/docs", "tamano": "~19 MB", "tema": "Documentación de Phantom: conexión, firma y deeplinks" },
-    { "nombre": "cloudflare", "url": "https://github.com/cloudflare/cloudflare-docs", "solo": ["src/content"], "tamano": "no medido", "tema": "Documentación de Cloudflare (Workers, Durable Objects, D1, KV, R2, Tunnel); solo src/content (~10,000 archivos de texto)" },
+    { "nombre": "cloudflare", "url": "https://github.com/cloudflare/cloudflare-docs", "solo": ["src/content"], "tamano": "~111 MB", "tema": "Documentación de Cloudflare (Workers, Durable Objects, D1, KV, R2, Tunnel); solo src/content (~10,000 archivos de texto)" },
     { "nombre": "rojo", "url": "https://github.com/rojo-rbx/rojo.space", "tamano": "~4 MB", "tema": "Documentación de Rojo (sincronizar proyectos de Roblox desde archivos)" },
     { "nombre": "luau", "url": "https://github.com/luau-lang/site", "tamano": "~6 MB", "tema": "Sitio y documentación del lenguaje Luau" },
-    { "nombre": "roblox", "url": "https://github.com/Roblox/creator-docs", "solo": ["content/en-us"], "tamano": "no medido", "tema": "Documentación de creadores de Roblox (guías y referencia de la API); solo content/en-us" },
-    { "nombre": "godot", "url": "https://github.com/godotengine/godot-docs", "tamano": "no medido (~3,600 archivos, muchas imágenes)", "tema": "Documentación oficial de Godot 4 (manual y tutoriales)" },
+    { "nombre": "roblox", "url": "https://github.com/Roblox/creator-docs", "solo": ["content/en-us"], "tamano": "~66 MB", "tema": "Documentación de creadores de Roblox (guías y referencia de la API); solo content/en-us" },
+    { "nombre": "godot", "url": "https://github.com/godotengine/godot-docs", "tamano": "~453 MB", "tema": "Documentación oficial de Godot 4 (manual y tutoriales)" },
     { "nombre": "claude-skills", "url": "https://github.com/anthropics/skills", "tamano": "~17 MB", "tema": "Skills oficiales de Anthropic y la especificación de Agent Skills" },
-    { "nombre": "expo", "url": "https://github.com/expo/expo", "solo": ["docs/pages"], "tamano": "no medido", "tema": "Documentación de Expo; solo docs/pages del monorepo (~1,750 archivos de texto)" },
+    { "nombre": "expo", "url": "https://github.com/expo/expo", "solo": ["docs/pages"], "tamano": "~26 MB", "tema": "Documentación de Expo; solo docs/pages del monorepo (~1,750 archivos de texto)" },
     { "nombre": "expo-skills", "url": "https://github.com/expo/skills", "tamano": "~9 MB", "tema": "Skills oficiales de Expo para agentes" },
-    { "nombre": "tauri", "url": "https://github.com/tauri-apps/tauri-docs", "solo": ["src/content"], "tamano": "no medido", "tema": "Documentación de Tauri 2 (apps de escritorio); solo src/content" },
-    { "nombre": "hyprland", "url": "https://github.com/hyprwm/hyprland-wiki", "tamano": "~3 MB", "tema": "Wiki de Hyprland (configuración en Lua, dispatchers, hyprctl)" }
+    { "nombre": "tauri", "url": "https://github.com/tauri-apps/tauri-docs", "solo": ["src/content"], "tamano": "~31 MB", "tema": "Documentación de Tauri 2 (apps de escritorio); solo src/content" },
+    { "nombre": "hyprland", "url": "https://github.com/hyprwm/hyprland-wiki", "tamano": "~2 MB", "tema": "Wiki de Hyprland (configuración en Lua, dispatchers, hyprctl)" }
   ]
 }

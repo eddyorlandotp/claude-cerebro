@@ -144,7 +144,8 @@ en('reinicio', () => {
   recalcular();
 });
 en('sesion', () => { if (espera === 'inactivo') espera = null; recalcular(); });
-en('prompt', () => {
+en('prompt', (ev) => {
+  if (ev.enCola) { cara.parpadear(0.1); return; }
   activas.clear(); espera = null; hablandoHasta = 0; tropiezoHasta = 0;
   burbujas.limpiar(); fichas.textContent = '';
   cara.poner('atenta'); cara.parpadear(0.1);
@@ -211,7 +212,9 @@ en('herramienta', (ev) => {
 });
 en('subagente', (ev) => {
   if (ev.fase === 'inicio') {
-    if (subs.has(ev.id)) return;
+    const previo = subs.get(ev.id);
+    if (previo && previo.fase === 'vivo') return;
+    if (previo) previo.etq.remove();      // se había ido y lo reanudaron: sale de nuevo
     const s = {
       id: ev.id, tipo: ev.tipoAgente || 'agente', descripcion: ev.descripcion || '', nota: '',
       cara: new Cara({ mini: true, semilla: subs.size + 5 }), etq: el('div', 'sub-etq'), hueco: el('i', 'sub-cara'), txt: el('div', 'sub-txt'),
@@ -235,8 +238,9 @@ en('espera', (ev) => {
   recalcular();
 });
 en('fin_turno', () => {
+  // Los subagentes no se recogen aquí: los que corren en segundo plano siguen después del turno
+  // y el servidor manda su propio `subagente` fin cuando de verdad terminan.
   activas.clear();
-  for (const s of subs.values()) if (s.fase === 'vivo') { s.fase = 'vuelve'; s.k = 0; s.x0 = s.x; s.y0 = s.y; s.etq.classList.add('sale'); }
   recalcular();
 });
 en('uso', (ev) => { cara.contexto = ev.ventana ? ev.contexto / ev.ventana : 0; });

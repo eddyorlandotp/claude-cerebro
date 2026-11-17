@@ -28,7 +28,7 @@ function recortarRuta(ruta, max) {
 const CLASES = {
   Read: 'leer', NotebookRead: 'leer',
   Grep: 'buscar', Glob: 'buscar', ToolSearch: 'buscar', LS: 'buscar',
-  Bash: 'comando', BashOutput: 'comando', KillShell: 'comando',
+  Bash: 'comando', BashOutput: 'comando', KillShell: 'comando', Monitor: 'comando', TaskStop: 'comando', TaskOutput: 'comando',
   Edit: 'editar', Write: 'editar', MultiEdit: 'editar', NotebookEdit: 'editar',
   WebFetch: 'web', WebSearch: 'web',
   Task: 'agente', Agent: 'agente',
@@ -61,8 +61,13 @@ export function resumir(nombre, input, cwd) {
     r = recortarRuta(rutaRelativa(i.file_path ?? i.notebook_path ?? i.path ?? '', cwd), 80);
   } else if (nombre === 'Bash') {
     r = recortarMedio(texto(i.command), 80);
-  } else if (nombre === 'BashOutput' || nombre === 'KillShell') {
-    r = recortar(texto(i.bash_id ?? i.shell_id), 80);
+  } else if (nombre === 'BashOutput' || nombre === 'KillShell' || nombre === 'TaskStop' || nombre === 'TaskOutput') {
+    r = recortar(texto(i.bash_id ?? i.shell_id ?? i.task_id), 80);
+  } else if (nombre === 'Monitor') {
+    r = recortarMedio(texto(i.description) || texto(i.command), 80);
+  } else if (nombre === 'SendMessage') {
+    // Mensaje a un subagente que ya existe (lo reanuda): se muestra el resumen, no el id del destinatario.
+    r = recortar(texto(i.summary) || texto(i.message) || texto(i.content), 80);
   } else if (nombre === 'Grep') {
     r = recortarMedio(texto(i.pattern) + (i.path ? ' en ' + rutaRelativa(i.path, cwd) : i.glob ? ' en ' + i.glob : ''), 80);
   } else if (nombre === 'Glob') {
@@ -119,6 +124,16 @@ function textoDeContenido(contenido) {
   return contenido.map((b) => (b && b.type === 'text' && typeof b.text === 'string' ? b.text : '')).filter(Boolean).join('\n');
 }
 
+/** Quita lo que la terminal agrega alrededor de un pedido (avisos del sistema, envoltura de texto pegado). */
+function limpiarPedido(t) {
+  return String(t ?? '')
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
+    .replace(/<\/?pasted_content[^>]*>/g, ' ')
+    .trim();
+}
+
+const esVerdadero = (v) => v === true || v === 'true';
+
 function tamanoDe(contenido) {
   if (typeof contenido === 'string') return contenido.length;
   if (!Array.isArray(contenido)) return 0;
@@ -146,8 +161,13 @@ export function skillPorRuta(nombre, input) {
  * Un intérprete por sesión; las líneas de subagentes se pasan con `{ agente }`.
  */
 export class Interprete {
-  constructor({ sesion = null } = {}) {
+  /**
+   * `ventanas`: { modelo: tokens } con la ventana ya vista para cada modelo en otras sesiones
+   * (el transcript no dice el tamaño de la ventana; solo se sabe que es de 1M cuando se pasa de 200k).
+   */
+  constructor({ sesion = null, ventanas = null } = {}) {
     this.sesion = sesion;
+    this.ventanas = ventanas && typeof ventanas === 'object' ? ventanas : {};
     this.info = { proyecto: null, cwd: null, modelo: null, version: null, rama: null };
     this.infoEmitida = '';
     this.abiertas = new Map(); // tool_use_id -> { nombre, clase, ts, agente, input }
@@ -185,7 +205,7 @@ export class Interprete {
   }
 
   /** Procesa un registro ya parseado. */
-  registro(r, { agente = null } = {}) {
+  registro(r, { agente = null, meta = null } = {}) {
     if (!r || typeof r !== 'object' || Array.isArray(r)) return [];
     const salida = [];
     const fecha = typeof r.timestamp === 'string' ? Date.parse(r.timestamp) : NaN;
@@ -194,7 +214,7 @@ export class Interprete {
     if (!this.sesion && typeof r.sessionId === 'string') this.sesion = r.sessionId;
 
     const lateral = r.isSidechain === true || agente != null;
-    const idAgente = lateral ? this.#resolverAgente(agente ?? r.agentId ?? 'lateral', r, ts, salida) : null;
+    const idAgente = lateral ? this.#resolverAgente(agente ?? r.agentId ?? 'lateral', r, ts, salida, meta) : null;
     if (!lateral) this.#datosDeSesion(r, ts, salida);
 
     switch (r.type) {
@@ -213,8 +233,11 @@ export class Interprete {
           this.#emitirUso(ts, salida);
         }
         break;
+      case 'attachment':
+        if (!lateral) this.#adjunto(r, ts, salida);
+        break;
       default:
-        break; // attachment, summary, queue-operation, last-prompt y lo que venga: se ignora
+        break; // summary, queue-operation, last-prompt, api-request* y lo que venga: se ignora
     }
     return salida;
   }
@@ -229,25 +252,47 @@ export class Interprete {
     };
     poner('cwd', r.cwd);
     poner('version', r.version);
-    poner('rama', r.gitBranch);
+    if (r.gitBranch !== 'HEAD') poner('rama', r.gitBranch); // fuera de un repo de git llega 'HEAD': no es una rama
     if (r.type === 'assistant' && r.message && r.message.model !== '<synthetic>') poner('modelo', r.message.model);
     if (this.info.cwd) this.info.proyecto = path.basename(this.info.cwd);
     if (!cambio) return;
     const firma = JSON.stringify(this.info);
     if (firma === this.infoEmitida) return;
     this.infoEmitida = firma;
-    if (this.info.modelo && /\[1m\]|-1m\b/i.test(this.info.modelo)) this.uso.ventana = 1000000;
+    if (this.info.modelo && (/\[1m\]|-1m\b/i.test(this.info.modelo) || this.ventanas[this.info.modelo] >= 1000000)) this.uso.ventana = 1000000;
     salida.push(this.#evento('sesion', ts, { ...this.info }));
   }
 
   /** Traduce el id de un archivo de subagente al id con el que se anunció (el tool_use del Agent). */
-  #resolverAgente(agentId, r, ts, salida) {
+  #resolverAgente(agentId, r, ts, salida, meta = null) {
     const clave = String(agentId);
     const conocido = this.alias.get(clave);
     if (conocido) {
       const s = this.subagentes.get(conocido);
-      if (s) s.ultimo = ts;
+      if (s) {
+        s.ultimo = ts;
+        // Llegan líneas de un subagente que ya se había dado por terminado (lo reanudaron con
+        // SendMessage, o siguió en segundo plano): vuelve a salir.
+        if (s.cerrado) this.#reabrir(conocido, s, ts, salida);
+      }
       return conocido;
+    }
+    // Lo seguro: el archivo agent-<id>.meta.json dice qué tool_use lo lanzó.
+    const lanzador = meta && typeof meta.toolUseId === 'string' ? meta.toolUseId : null;
+    if (lanzador) {
+      let s = this.subagentes.get(lanzador);
+      if (!s) {
+        // Su tool_use todavía no pasó por aquí (p. ej. lo lanzó otro subagente): se anuncia con lo que dice el meta.
+        s = { tipoAgente: String(meta.tipoAgente || 'agente'), descripcion: recortar(meta.descripcion ?? '', 80), prompt: '', agentId: clave, fondo: true, cerrado: false, ultimo: ts };
+        this.subagentes.set(lanzador, s);
+        salida.push(this.#evento('subagente', ts, { id: lanzador, fase: 'inicio', tipoAgente: s.tipoAgente, descripcion: s.descripcion }));
+      } else if (s.cerrado) {
+        this.#reabrir(lanzador, s, ts, salida);
+      }
+      s.agentId = clave;
+      s.ultimo = ts;
+      this.alias.set(clave, lanzador);
+      return lanzador;
     }
     // Primero por el texto del encargo; si no, el subagente abierto más viejo que aún no tenga archivo.
     const encargo = r.type === 'user' && r.message ? textoDeContenido(r.message.content).trim() : '';
@@ -271,6 +316,32 @@ export class Interprete {
     this.alias.set(clave, clave);
     salida.push(this.#evento('subagente', ts, { id: clave, fase: 'inicio', tipoAgente: 'agente', descripcion: recortar(encargo, 80) }));
     return clave;
+  }
+
+  #reabrir(id, s, ts, salida) {
+    s.cerrado = false;
+    s.fondo = true;
+    s.ultimo = ts;
+    salida.push(this.#evento('subagente', ts, { id, fase: 'inicio', tipoAgente: s.tipoAgente, descripcion: s.descripcion }));
+  }
+
+  /**
+   * Da por terminado un subagente (por el id de su archivo o por el de su tool_use). Lo llama el
+   * servidor cuando su meta.json marca `finished`. Devuelve los eventos.
+   */
+  cerrarSubagente(agentId, ts = Date.now()) {
+    const id = this.alias.get(String(agentId)) ?? String(agentId);
+    const s = this.subagentes.get(id);
+    if (!s || s.cerrado) return [];
+    s.cerrado = true;
+    return [this.#evento('subagente', ts, { id, fase: 'fin', tipoAgente: s.tipoAgente, descripcion: s.descripcion })];
+  }
+
+  /** Red de seguridad: cierra los subagentes que llevan más de `ms` sin dar señales. */
+  caducarSubagentes(ts = Date.now(), ms = 15 * 60 * 1000) {
+    const salida = [];
+    for (const [id, s] of this.subagentes) if (!s.cerrado && ts - (s.ultimo ?? 0) > ms) salida.push(...this.cerrarSubagente(id, ts));
+    return salida;
   }
 
   #abrirTurno(ts) {
@@ -310,7 +381,7 @@ export class Interprete {
       return;
     }
     if (r.isMeta === true) return;
-    let t = textoDeContenido(contenido).replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '').trim();
+    let t = limpiarPedido(textoDeContenido(contenido));
     if (!t) return;
     if (t.startsWith('[Request interrupted')) {
       salida.push(...this.cerrarTurno(ts));
@@ -331,6 +402,21 @@ export class Interprete {
     this.#abrirTurno(ts);
     salida.push(this.#evento('prompt', ts, { texto: recortar(t, 600) }));
     if (skillInvocada) salida.push(this.#evento('skill_usada', ts, { id: skillInvocada }));
+  }
+
+  /**
+   * Adjuntos. El único que importa: `queued_command` de origen humano, que es como queda escrito un
+   * mensaje que el usuario manda mientras Claude sigue trabajando (no aparece como registro `user`).
+   * Es un pedido nuevo dentro del mismo turno: se emite `prompt` con `enCola: true` y el turno no se corta.
+   */
+  #adjunto(r, ts, salida) {
+    const a = r.attachment && typeof r.attachment === 'object' ? r.attachment : null;
+    if (!a || a.type !== 'queued_command') return;
+    if (!a.origin || a.origin.kind !== 'human' || (a.commandMode && a.commandMode !== 'prompt')) return;
+    const t = limpiarPedido(textoDeContenido(a.prompt));
+    if (!t) return;
+    if (!this.turno.abierto) this.#abrirTurno(ts);
+    salida.push(this.#evento('prompt', ts, { texto: recortar(t, 600), enCola: true }));
   }
 
   #resultado(b, r, ts, salida) {
@@ -361,6 +447,14 @@ export class Interprete {
       evento.tareas = { op: 'crear', items: [{ id: String(idTarea), texto: recortar(abierta.input?.subject ?? abierta.input?.description ?? '', 120), estado: 'pendiente' }] };
     }
     salida.push(evento);
+
+    // SendMessage a un subagente lo reanuda: el resultado trae a quién.
+    const reanudado = extra.resumedAgentId ?? extra.revivedAgentId;
+    if (abierta.nombre === 'SendMessage' && ok && typeof reanudado === 'string') {
+      const idSub = this.alias.get(reanudado);
+      const sub = idSub ? this.subagentes.get(idSub) : null;
+      if (sub && sub.cerrado) this.#reabrir(idSub, sub, ts, salida);
+    }
 
     if (abierta.clase === 'agente') {
       const s = this.subagentes.get(id);
@@ -441,10 +535,17 @@ export class Interprete {
         descripcion: recortar(input.description ?? input.prompt ?? '', 80),
         prompt: typeof input.prompt === 'string' ? input.prompt : '',
         agentId: null,
-        fondo: input.run_in_background === true,
+        fondo: esVerdadero(input.run_in_background), // en transcripts reales llega como texto "true"
         cerrado: false,
         ultimo: ts,
       };
+      const previo = this.subagentes.get(b.id);
+      if (previo) {
+        // Ya lo había anunciado su archivo (meta.json): solo se completa lo que faltaba.
+        previo.prompt = s.prompt;
+        if (!previo.descripcion) previo.descripcion = s.descripcion;
+        return;
+      }
       this.subagentes.set(b.id, s);
       salida.push(this.#evento('subagente', ts, { id: b.id, fase: 'inicio', tipoAgente: s.tipoAgente, descripcion: s.descripcion }));
     } else if (clase === 'pregunta' && idAgente == null) {
@@ -483,7 +584,10 @@ export class Interprete {
 
   #emitirUso(ts, salida) {
     const contexto = this.uso.entrada + this.uso.cacheLeida + this.uso.cacheCreada;
-    if (contexto > 200000) this.uso.ventana = 1000000;
+    if (contexto > 200000 && this.uso.ventana < 1000000) {
+      this.uso.ventana = 1000000;
+      if (this.info.modelo) this.ventanas[this.info.modelo] = 1000000; // el servidor lo guarda para las próximas sesiones
+    }
     const campos = {
       entrada: this.uso.entrada,
       salida: this.acumulado.salida,

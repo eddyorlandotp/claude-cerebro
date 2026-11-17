@@ -39,12 +39,15 @@ function paso(dtMs) {
 // Medición de costo por cuadro (para depurar rendimiento): window.__telarana.stats
 const stats = { cuadros: 0, msTotal: 0, msMax: 0, reiniciar() { this.cuadros = 0; this.msTotal = 0; this.msMax = 0; }, get promedio() { return this.cuadros ? this.msTotal / this.cuadros : 0; } };
 
-let anterior = 0, saltar = false;
+let anterior = 0;
+const topeFps = params.has('fps') ? Math.max(0, Number(params.get('fps')) || 0) : 60;
 function cuadro(ahora) {
   requestAnimationFrame(cuadro);
   if (document.hidden) { anterior = ahora; return; }
-  // dormida más de un minuto: 30 fps
-  if (pensamiento.cara.estado === 'dormida' && reloj.t - pensamiento.cara.desde > 60000) { saltar = !saltar; if (saltar) return; }
+  // Tope de 60 fps (dormida más de un minuto: 30). En monitores de 144/165 Hz dibujar cada refresco
+  // casi triplica el uso de CPU sin que se note en un panel que se mira de reojo. ?fps=0 quita el tope.
+  const tope = pensamiento.cara.estado === 'dormida' && reloj.t - pensamiento.cara.desde > 60000 ? 30 : topeFps;
+  if (tope > 0 && ahora - anterior < (1000 / tope) * 0.8) return;
   const dtReal = Math.min(100, ahora - anterior || 16.7);
   anterior = ahora;
   const t0 = performance.now();

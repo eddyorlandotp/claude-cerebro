@@ -184,7 +184,22 @@ export function crearServidor({ puerto = 4317, demo = false, velocidad = 1, conf
   let vigia = null;
   const iniciarReal = () => {
     const dir = dirConfig(configDir);
-    let interprete = new Interprete();
+    // Ventana de contexto vista por modelo (el transcript no la trae): se recuerda entre sesiones.
+    const rutaVentanas = path.join(dirDatos(), 'ventanas.json');
+    const ventanas = leerJSON(rutaVentanas, {}) ?? {};
+    let firmaVentanas = JSON.stringify(ventanas);
+    const guardarVentanas = () => {
+      const firma = JSON.stringify(ventanas);
+      if (firma === firmaVentanas) return;
+      firmaVentanas = firma;
+      try {
+        asegurarDir(dirDatos());
+        fs.writeFileSync(rutaVentanas, firma);
+      } catch {
+        // sin guardar: se vuelve a descubrir en la próxima sesión larga
+      }
+    };
+    let interprete = new Interprete({ ventanas });
     let hilo = new Hilo();
     let indice = null;
     let modo = 'completo';
@@ -243,16 +258,20 @@ export function crearServidor({ puerto = 4317, demo = false, velocidad = 1, conf
 
     vigia = new Vigia({ configDir: dir });
     vigia.on('sesion', ({ id }) => {
-      interprete = new Interprete({ sesion: id });
+      interprete = new Interprete({ sesion: id, ventanas });
       hilo = new Hilo();
       alDia = false;
       estado.reiniciar(id);
     });
-    vigia.on('linea', ({ texto, agente, historico }) => {
-      for (const e of interprete.linea(texto, { agente })) procesar(e, historico || !alDia);
+    vigia.on('linea', ({ texto, agente, meta, historico }) => {
+      for (const e of interprete.linea(texto, { agente, meta })) procesar(e, historico || !alDia);
+    });
+    vigia.on('agente-fin', ({ agente, historico }) => {
+      for (const e of interprete.cerrarSubagente(agente, historico ? interprete.ultimoTs || Date.now() : Date.now())) procesar(e, historico || !alDia);
     });
     vigia.on('al-dia', () => {
       alDia = true;
+      guardarVentanas();
       // Lo que ya existía se leyó en silencio; ahora los clientes reciben la foto completa.
       emitirHilo(Date.now(), true);
       for (const c of clientes) for (const e of estado.iniciales()) enviar(c, e);
@@ -292,6 +311,8 @@ export function crearServidor({ puerto = 4317, demo = false, velocidad = 1, conf
     // Si el turno ya terminó y pasan 2 minutos sin nada, se avisa una vez que está inactivo.
     let avisoInactivo = 0;
     const relojInactivo = setInterval(() => {
+      guardarVentanas();
+      if (alDia) for (const e of interprete.caducarSubagentes(Date.now())) procesar(e, false);
       const ultimo = estado.ultimoEvento;
       if (!alDia || !ultimo || estado.turno.abierto || estado.espera) return;
       if (Date.now() - ultimo > 120000 && avisoInactivo !== ultimo) {

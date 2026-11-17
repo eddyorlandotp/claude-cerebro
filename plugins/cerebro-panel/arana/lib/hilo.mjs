@@ -49,7 +49,7 @@ export class Hilo {
     if (!e || typeof e !== 'object') return;
     this.reloj++;
     if (e.tipo === 'prompt') {
-      this.turnos++;
+      if (!e.enCola) this.turnos++;
       const texto = recortar(e.texto, 240);
       if (texto) this.ultimoPedido = texto;
       if (!this.objetivo && esSustantivo(e.texto)) this.objetivo = texto;

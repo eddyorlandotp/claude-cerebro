@@ -41,7 +41,7 @@ Carpeta de datos del usuario: `${XDG_STATE_HOME:-~/.local/state}/cerebro-panel/`
 
 ## Fuentes de datos
 
-- **Transcript** (principal): `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<proyecto>/<sessionId>.jsonl`. Una línea JSON por registro. Campos observados en Claude Code 2.1.3xx: `type` (`user`, `assistant`, `attachment`, `system`, `summary`, `queue-operation`, `cost-state`, `last-prompt`, otros), `uuid`, `parentUuid`, `timestamp` (ISO), `sessionId`, `cwd`, `version`, `gitBranch`, `isSidechain` (true = subagente). En `user`/`assistant`, `message` sigue el formato de la API de Anthropic: `message.content` es string o lista de bloques `text`, `thinking` (`thinking`: texto, puede venir vacío), `tool_use` (`id`, `name`, `input`), `tool_result` (`tool_use_id`, `content`, `is_error`). `assistant.message.model` y `assistant.message.usage` (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`). `attachment.attachment.type` incluye `skill_listing` (con `names`), `model`, etc. `cost-state` trae `totalCostUSD`. El parser debe **ignorar sin fallar** todo tipo o campo que no conozca. Los subagentes pueden vivir en el mismo archivo (`isSidechain: true`) o en `<sessionId>/subagents/*.jsonl`: soporta ambos.
+- **Transcript** (principal): `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<proyecto>/<sessionId>.jsonl`. Una línea JSON por registro. Campos observados en Claude Code 2.1.3xx: `type` (`user`, `assistant`, `attachment`, `system`, `summary`, `queue-operation`, `cost-state`, `last-prompt`, otros), `uuid`, `parentUuid`, `timestamp` (ISO), `sessionId`, `cwd`, `version`, `gitBranch`, `isSidechain` (true = subagente). En `user`/`assistant`, `message` sigue el formato de la API de Anthropic: `message.content` es string o lista de bloques `text`, `thinking` (`thinking`: texto, puede venir vacío), `tool_use` (`id`, `name`, `input`), `tool_result` (`tool_use_id`, `content`, `is_error`). `assistant.message.model` y `assistant.message.usage` (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`). `attachment.attachment.type` incluye `skill_listing` (con `names`), `model`, etc. `cost-state` trae `totalCostUSD`. El parser debe **ignorar sin fallar** todo tipo o campo que no conozca. Los subagentes pueden vivir en el mismo archivo (`isSidechain: true`) o en `<sessionId>/subagents/agent-<id>.jsonl`: soporta ambos. En 2.1.32x solo se ve la segunda forma, y junto a cada uno hay un `agent-<id>.meta.json` con `toolUseId` (el `tool_use` que lo lanzó), `agentType`, `description`, `parentAgentId` (si lo lanzó otro subagente) y `finished`: ese archivo es el enlace y la señal de fin. Un mensaje que el usuario manda a media tarea no queda como registro `user` sino como `attachment` de tipo `queued_command` (`origin.kind: "human"`). Hay registros que traen `message` y no son conversación (`api-request-blob`): solo cuentan `user` y `assistant`.
 - **Hooks** (complemento): el plugin registra hooks que agregan una línea al archivo `eventos.jsonl` (lo único que el transcript no da a tiempo: `Notification` = Claude espera permiso/respuesta, `PreCompact`, `SessionStart`, `Stop`).
 
 ## Eventos normalizados (servidor -> UI)
@@ -52,7 +52,7 @@ SSE en `GET /eventos`. Cada mensaje: `data: <json>\n\n`, con `{ "tipo": ..., "ts
 |---|---|
 | `sesion` | `proyecto` (nombre de carpeta), `cwd`, `modelo`, `version`, `rama` |
 | `biblioteca` | `plugins: [{ nombre, activo, skills: [{ id, nombre, desc }] }]` (`id` = `plugin:skill`) |
-| `prompt` | `texto` (recortado a 600) |
+| `prompt` | `texto` (recortado a 600); `enCola: true` si el usuario lo mandó a media tarea (mismo turno: no reinicia flujo ni contador) |
 | `sugeridas` | `skills: [{ id, puntaje }]` (máx 4), `apagadas: [id]` (sugeridas cuyo plugin está apagado) |
 | `pensamiento` | `texto` (recortado a 400), `agente` (id de subagente o null) |
 | `dicho` | `texto` (texto visible del asistente, recortado a 400), `agente` |
@@ -66,7 +66,7 @@ SSE en `GET /eventos`. Cada mensaje: `data: <json>\n\n`, con `{ "tipo": ..., "ts
 | `hilo` | `objetivo`, `ultimoPedido`, `archivos: [{ ruta, veces, accion }]` (máx 8), `comandos: [string]` (máx 5), `errores: [string]` (máx 3), `pendientes: [{ texto, estado }]`, `turnos` |
 | `latido` | cada 15 s para mantener viva la conexión |
 
-Clasificación de herramientas -> `clase`: `Read`,`NotebookRead` = leer; `Grep`,`Glob`,`ToolSearch`,`LS` = buscar; `Bash`,`BashOutput`,`KillShell` = comando; `Edit`,`Write`,`MultiEdit`,`NotebookEdit` = editar; `WebFetch`,`WebSearch` = web; `Task`,`Agent` = agente; `Skill` = skill; `mcp__*` = mcp; `TodoWrite`,`TaskCreate`,`TaskUpdate` = tarea; `AskUserQuestion` = pregunta; resto = otro.
+Clasificación de herramientas -> `clase`: `Read`,`NotebookRead` = leer; `Grep`,`Glob`,`ToolSearch`,`LS` = buscar; `Bash`,`BashOutput`,`KillShell`,`Monitor`,`TaskStop`,`TaskOutput` = comando; `Edit`,`Write`,`MultiEdit`,`NotebookEdit` = editar; `WebFetch`,`WebSearch` = web; `Task`,`Agent` = agente; `Skill` = skill; `mcp__*` = mcp; `TodoWrite`,`TaskCreate`,`TaskUpdate` = tarea; `AskUserQuestion` = pregunta; resto = otro.
 
 ## HTTP
 
@@ -128,4 +128,10 @@ Límite conocido: la araña elige por palabras, no entiende. Fallará a veces; p
 - `espera.motivo`: `permiso | respuesta | inactivo` (`inactivo` lo emite el servidor tras 2 min sin eventos).
 - La araña no repite en la misma sesión una skill ya sugerida (se olvida tras compactar o limpiar). El aviso de MCP/agentes de un plugin apagado va una vez por plugin.
 - El índice distingue `tipo: skill | comando` y marca `manual` (skills con `disable-model-invocation`).
-- Estado de verificación: el parser solo se ha probado con transcripts sintéticos y con el encabezado, el prompt y el texto del asistente de una sesión real (Claude Code 2.1.326). Bloques `thinking`, `tool_use`/`tool_result`, subagentes y fin de turno reales están **sin verificar**; ver `PROMPT-LOCAL.md`.
+- Estado de verificación (nov 2026): el parser se comprobó contra 25 sesiones reales y 134 archivos de subagente (Claude Code 2.1.319–2.1.326); ver `local/telarana/REPORTE.md`. La forma real quedó copiada, con texto inventado, en `servidor/test/fixtures/formato-real/` (`servidor/generar-fixture-real.mjs`).
+- Subagentes: el vigía lee `agent-<id>.meta.json` y lo pasa con cada línea (`meta`); emite `agente-fin` cuando el meta marca `finished`. Un subagente cerrado que vuelve a escribir (lo reanudaron con `SendMessage`, o seguía en segundo plano) se anuncia otra vez con `subagente` inicio. `fin_turno` ya **no** recoge a los subagentes en la interfaz: solo su propio `subagente` fin. Red de seguridad: 15 min sin señales = fin.
+- Al engancharse a una sesión, lo que ya existía se entrega ordenado por fecha (principal y subagentes mezclados).
+- `uso.ventana`: el transcript no trae el tamaño de la ventana. Es 200k hasta que el contexto pasa de 200k; entonces 1M, y se recuerda por modelo en `ventanas.json` para las siguientes sesiones.
+- `sesion.rama` va vacía fuera de un repo de git (el transcript trae `HEAD`).
+- La interfaz dibuja a 60 fps como máximo (30 dormida), aunque el monitor sea de 144/165 Hz; `?fps=0` quita el tope.
+- `abrir.sh` también encuentra Chromium, Brave y Chrome instalados con flatpak; ahí el perfil vive en `~/.var/app/<id>/cerebro-panel` y la ventana se busca por clase/título porque el pid no coincide. `TELARANA_NAVEGADOR_ARGS` agrega opciones al navegador (depuración).

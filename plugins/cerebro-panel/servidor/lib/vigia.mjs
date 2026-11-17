@@ -107,10 +107,37 @@ export function sesionMasReciente(configDir) {
 }
 
 /**
+ * Lee `agent-<id>.meta.json`, el archivo que Claude Code escribe junto al transcript de cada subagente.
+ * Devuelve { toolUseId, tipoAgente, descripcion, padre, terminado } o null si no existe o no se entiende.
+ */
+export function leerMeta(rutaJsonl) {
+  try {
+    const m = JSON.parse(fs.readFileSync(rutaJsonl.replace(/\.jsonl$/, '.meta.json'), 'utf8'));
+    if (!m || typeof m !== 'object') return null;
+    return {
+      toolUseId: typeof m.toolUseId === 'string' ? m.toolUseId : null,
+      tipoAgente: typeof m.agentType === 'string' ? m.agentType : null,
+      descripcion: typeof m.description === 'string' ? m.description : '',
+      padre: typeof m.parentAgentId === 'string' ? m.parentAgentId : null,
+      terminado: m.finished === true || m.stoppedByUser === true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+const RE_FECHA = /"timestamp":"([^"]+)"/;
+
+/**
  * Emite:
- *   'sesion'  ({ id, ruta })                 cuando empieza a seguir una sesión (antes de sus líneas)
- *   'linea'   ({ texto, agente, historico }) cada línea nueva; `agente` = id del archivo de subagente o null
- *   'al-dia'  ()                             cuando terminó de leer lo que ya existía de esa sesión
+ *   'sesion'     ({ id, ruta })                       cuando empieza a seguir una sesión (antes de sus líneas)
+ *   'linea'      ({ texto, agente, meta, historico }) cada línea nueva; `agente` = id del archivo de subagente
+ *                                                     o null; `meta` = lo que dice su meta.json (o null)
+ *   'agente-fin' ({ agente, historico })              el meta.json de ese subagente quedó marcado como terminado
+ *   'al-dia'     ()                                   cuando terminó de leer lo que ya existía de esa sesión
+ *
+ * Lo que ya existía al engancharse se entrega ordenado por fecha (principal y subagentes mezclados),
+ * para que la historia se reconstruya igual que si se hubiera visto en vivo.
  */
 export class Vigia extends EventEmitter {
   constructor({ configDir, intervalo = 250, intervaloBusqueda = 2000, histeresis = 3000 } = {}) {
@@ -145,6 +172,8 @@ export class Vigia extends EventEmitter {
       subagentes: new Map(),
       alDia: false,
       actividad: s.mtime,
+      historia: [], // líneas acumuladas mientras se pone al día
+      orden: 0,
     };
     this.emit('sesion', { id: s.id, ruta: s.ruta });
   }
@@ -172,8 +201,41 @@ export class Vigia extends EventEmitter {
     for (const n of nombres) {
       if (!n.endsWith('.jsonl') || this.actual.subagentes.has(n)) continue;
       const agente = n.slice(0, -6).replace(/^agent-/, '');
-      this.actual.subagentes.set(n, { agente, seguidor: new Seguidor(path.join(dir, n)) });
+      const ruta = path.join(dir, n);
+      this.actual.subagentes.set(n, { agente, ruta, seguidor: new Seguidor(ruta), meta: leerMeta(ruta), finAvisado: false, revisado: 0 });
     }
+  }
+
+  /** Relee el meta de un subagente que aún no termina (como mucho una vez por segundo). */
+  #refrescarMeta(sub, ahora, forzar = false) {
+    if (sub.meta && sub.meta.terminado) return;
+    if (!forzar && ahora - sub.revisado < 1000) return;
+    sub.revisado = ahora;
+    const m = leerMeta(sub.ruta);
+    if (m) sub.meta = m;
+  }
+
+  #ponerAlDia(a) {
+    // Orden por fecha; las líneas sin fecha heredan la de la anterior de su mismo archivo.
+    const lineas = a.historia;
+    a.historia = [];
+    const ultima = new Map();
+    for (const l of lineas) {
+      const m = RE_FECHA.exec(l.texto);
+      const t = m ? Date.parse(m[1]) : NaN;
+      l.t = Number.isFinite(t) ? t : ultima.get(l.agente) ?? 0;
+      ultima.set(l.agente, l.t);
+    }
+    lineas.sort((x, y) => x.t - y.t || x.orden - y.orden);
+    for (const l of lineas) this.emit('linea', { texto: l.texto, agente: l.agente, meta: l.meta, historico: true });
+    for (const sub of a.subagentes.values()) {
+      if (sub.meta && sub.meta.terminado && !sub.finAvisado) {
+        sub.finAvisado = true;
+        this.emit('agente-fin', { agente: sub.agente, historico: true });
+      }
+    }
+    a.alDia = true;
+    this.emit('al-dia');
   }
 
   /** Un paso de lectura. Público para poder probarlo sin relojes. */
@@ -188,32 +250,48 @@ export class Vigia extends EventEmitter {
       }
       const a = this.actual;
       if (!a) return;
-      const historico = !a.alDia;
       let pendiente = false;
       let hubo = false;
-      const r = a.principal.leer();
-      pendiente ||= r.pendiente;
-      for (const texto of r.lineas) {
-        hubo = true;
-        this.emit('linea', { texto, agente: null, historico });
+      if (!a.alDia) {
+        // Poniéndose al día: se junta todo (principal y subagentes) y se entrega ordenado al terminar.
+        const r = a.principal.leer();
+        pendiente ||= r.pendiente;
+        for (const texto of r.lineas) a.historia.push({ texto, agente: null, meta: null, orden: a.orden++ });
+        if (!r.pendiente) {
+          this.#archivosDeSubagentes();
+          for (const sub of a.subagentes.values()) {
+            const rs = sub.seguidor.leer();
+            pendiente ||= rs.pendiente;
+            for (const texto of rs.lineas) a.historia.push({ texto, agente: sub.agente, meta: sub.meta, orden: a.orden++ });
+          }
+        }
+        if (!pendiente) this.#ponerAlDia(a);
+        return;
       }
-      // Mientras se pone al día con el archivo principal no se mezclan los subagentes.
-      if (!r.pendiente) {
-        this.#archivosDeSubagentes();
-        for (const { agente, seguidor } of a.subagentes.values()) {
-          const rs = seguidor.leer();
-          pendiente ||= rs.pendiente;
-          for (const texto of rs.lineas) {
-            hubo = true;
-            this.emit('linea', { texto, agente, historico });
+      // En vivo: primero los subagentes, para que sus últimas líneas salgan antes que el
+      // resultado del Agent en el archivo principal (que es lo que los da por terminados).
+      this.#archivosDeSubagentes();
+      for (const sub of a.subagentes.values()) {
+        const rs = sub.seguidor.leer();
+        if (rs.lineas.length) {
+          hubo = true;
+          if (!sub.meta) this.#refrescarMeta(sub, ahora, true);
+          for (const texto of rs.lineas) this.emit('linea', { texto, agente: sub.agente, meta: sub.meta, historico: false });
+        }
+        if (!sub.finAvisado && !rs.pendiente) {
+          this.#refrescarMeta(sub, ahora);
+          if (sub.meta && sub.meta.terminado) {
+            sub.finAvisado = true;
+            this.emit('agente-fin', { agente: sub.agente, historico: false });
           }
         }
       }
-      if (hubo) a.actividad = Math.max(a.actividad, ahora);
-      if (!a.alDia && !pendiente) {
-        a.alDia = true;
-        this.emit('al-dia');
+      const r = a.principal.leer();
+      for (const texto of r.lineas) {
+        hubo = true;
+        this.emit('linea', { texto, agente: null, meta: null, historico: false });
       }
+      if (hubo) a.actividad = Math.max(a.actividad, ahora);
     } catch (e) {
       this.emit('aviso', e);
     } finally {

@@ -111,6 +111,17 @@ navegador() {
       return 0
     fi
   done
+  # Instalados con flatpak (no dejan binario en el PATH). Se imprime "flatpak:ID".
+  if command -v flatpak >/dev/null 2>&1; then
+    local apps
+    apps="$(flatpak list --app --columns=application 2>/dev/null)"
+    for n in org.chromium.Chromium com.brave.Browser com.google.Chrome io.github.ungoogled_software.ungoogled_chromium; do
+      if printf '%s\n' "$apps" | grep -qx "$n"; then
+        printf 'flatpak:%s\n' "$n"
+        return 0
+      fi
+    done
+  fi
   return 1
 }
 
@@ -128,22 +139,37 @@ hypr() {
   [ "$r" = "ok" ]
 }
 
-# Busca en Hyprland la ventana del proceso $1; imprime "direccion <tab> pantallaCompleta(0|1)".
+# Direcciones de las ventanas que ya existen (separadas por espacio), para reconocer la nueva.
+ventanas_hypr() {
+  hyprctl -j clients 2>/dev/null | node -e '
+    let t = ""; process.stdin.on("data", (d) => (t += d)).on("end", () => {
+      try { console.log(JSON.parse(t).map((x) => x.address).join(" ")); } catch {}
+    });'
+}
+
+# Busca en Hyprland la ventana del panel; imprime "direccion <tab> pantallaCompleta(0|1)".
+# $1 = pid que lanzamos, $2 = direcciones que ya existían antes de abrir.
+# Primero por pid. Con flatpak (o si el navegador se relanza) el pid no coincide: entonces se toma
+# la ventana nueva cuya clase o título son los del panel (en Wayland Chromium ignora --class y usa
+# "chrome-127.0.0.1__-Default").
 ventana_hypr() {
   hyprctl -j clients 2>/dev/null | node -e '
     let t = ""; process.stdin.on("data", (d) => (t += d)).on("end", () => {
       try {
         const pid = Number(process.argv[1]);
-        const c = JSON.parse(t).find((x) => x.pid === pid);
+        const antes = new Set((process.argv[2] || "").split(" ").filter(Boolean));
+        const todas = JSON.parse(t);
+        const esPanel = (x) => /127\.0\.0\.1|telarana/i.test(x.class || "") || /127\.0\.0\.1|telarana/i.test(x.initialClass || "") || /^Telara/.test(x.title || "");
+        const c = todas.find((x) => x.pid === pid) || todas.find((x) => !antes.has(x.address) && esPanel(x));
         if (c) console.log(c.address + "\t" + (c.fullscreen && c.fullscreen !== 0 ? 1 : 0));
       } catch {}
-    });' "$1"
+    });' "$1" "${2:-}"
 }
 
 acomodar_hyprland() {
-  local pid="$1" dato="" dir llena i
+  local pid="$1" antes="${2:-}" dato="" dir llena i
   for i in $(seq 1 40); do
-    dato="$(ventana_hypr "$pid")"
+    dato="$(ventana_hypr "$pid" "$antes")"
     [ -n "$dato" ] && break
     sleep 0.25
   done
@@ -153,6 +179,7 @@ acomodar_hyprland() {
   fi
   dir="${dato%%$'\t'*}"
   llena="${dato##*$'\t'}"
+  printf '%s\n' "$dir" >>"$ARCHIVO_NAV"
   if [ -n "$MONITOR" ]; then
     hypr "hl.dsp.window.move({ window = \"address:$dir\", monitor = \"$MONITOR\" })" "$dir" "movewindow mon:$MONITOR" \
       || decir "No pude mover la ventana al monitor $MONITOR (revisa el nombre con: abrir.sh monitores)."
@@ -168,7 +195,7 @@ abrir() {
   iniciar || return 1
   local url="http://127.0.0.1:$PUERTO" nav
   if ! nav="$(navegador)"; then
-    decir "No encontré chromium, brave, google-chrome ni firefox. Abre a mano: $url"
+    decir "No encontré chromium, brave, google-chrome ni firefox (tampoco en flatpak). Abre a mano: $url"
     return 0
   fi
   # Posición del monitor elegido (sirve en X11; en Wayland la ignoran casi todos los compositores).
@@ -177,7 +204,17 @@ abrir() {
     posicion="$(monitores | awk -F'\t' -v m="$MONITOR" '$1 == m { print $3 }')"
     [ -z "$posicion" ] && decir "Aviso: no veo un monitor llamado $MONITOR."
   fi
-  local args=()
+  local args=() lanzar=("$nav") perfil="$PERFIL" nombre
+  nombre="$(basename "$nav")"
+  case "$nav" in
+    flatpak:*)
+      # El navegador de flatpak solo puede escribir dentro de su propia carpeta de datos.
+      nombre="${nav#flatpak:}"
+      lanzar=(flatpak run "$nombre")
+      perfil="$HOME/.var/app/$nombre/cerebro-panel"
+      mkdir -p "$perfil"
+      ;;
+  esac
   case "$(basename "$nav")" in
     firefox*)
       mkdir -p "$PERFIL-firefox"
@@ -187,37 +224,51 @@ abrir() {
       ;;
     *)
       # Perfil propio: así el proceso es nuestro (se puede cerrar sin tocar el navegador del usuario).
-      args=("--app=$url" "--user-data-dir=$PERFIL" --no-first-run --no-default-browser-check --class=telarana)
+      args=("--app=$url" "--user-data-dir=$perfil" --no-first-run --no-default-browser-check --class=telarana)
       [ -n "$posicion" ] && args+=("--window-position=$posicion")
       # En Hyprland la pantalla completa se pone después de mover la ventana al monitor.
       if [ -z "$VENTANA" ] && ! en_hyprland; then args+=(--start-fullscreen); fi
       ;;
   esac
+  local antes=""
+  en_hyprland && antes="$(ventanas_hypr)"
+  # Opciones extra para el navegador (para depurar; p. ej. TELARANA_NAVEGADOR_ARGS="--remote-debugging-port=9333").
+  if [ -n "${TELARANA_NAVEGADOR_ARGS:-}" ]; then
+    # shellcheck disable=SC2206
+    args+=(${TELARANA_NAVEGADOR_ARGS})
+  fi
   if command -v setsid >/dev/null 2>&1; then
-    setsid "$nav" "${args[@]}" >/dev/null 2>&1 </dev/null &
+    setsid "${lanzar[@]}" "${args[@]}" >/dev/null 2>&1 </dev/null &
   else
-    nohup "$nav" "${args[@]}" >/dev/null 2>&1 </dev/null &
+    nohup "${lanzar[@]}" "${args[@]}" >/dev/null 2>&1 </dev/null &
   fi
   local pid=$!
-  printf '%s\n' "$pid" >"$ARCHIVO_NAV"
-  decir "Abrí $url con $(basename "$nav")."
-  if en_hyprland; then acomodar_hyprland "$pid"; fi
+  # Línea 1: pid lanzado. Línea 2: carpeta del perfil. Línea 3 (Hyprland): dirección de la ventana.
+  printf '%s\n%s\n' "$pid" "$perfil" >"$ARCHIVO_NAV"
+  decir "Abrí $url con $nombre."
+  if en_hyprland; then acomodar_hyprland "$pid" "$antes"; fi
   decir "Teclas dentro del panel: F pantalla completa, 1-5 minimizar zonas, 0 restaurar."
 }
 
 cerrar() {
   # Navegador: solo si el proceso sigue siendo el que abrimos (usa nuestro perfil).
   if [ -f "$ARCHIVO_NAV" ]; then
-    local np
+    local np perfil cerrada=""
     np="$(sed -n 1p "$ARCHIVO_NAV" 2>/dev/null)"
+    perfil="$(sed -n 2p "$ARCHIVO_NAV" 2>/dev/null)"
+    case "$perfil" in */cerebro-panel|*/perfil-navegador*) ;; *) perfil="$PERFIL" ;; esac
     case "$np" in
       ''|*[!0-9]*) ;;
       *)
-        if tr '\0' ' ' <"/proc/$np/cmdline" 2>/dev/null | grep -q -- "$PERFIL"; then
-          kill "$np" 2>/dev/null && decir "Cerré la ventana del panel."
+        if tr '\0' ' ' <"/proc/$np/cmdline" 2>/dev/null | grep -qF -- "$perfil"; then
+          kill "$np" 2>/dev/null && cerrada=1
         fi
         ;;
     esac
+    # Con flatpak el pid lanzado es el envoltorio: se cierran los procesos que usan nuestro perfil
+    # (nunca el navegador normal del usuario, que usa otro perfil).
+    if command -v pkill >/dev/null 2>&1 && pkill -f -- "--user-data-dir=$perfil" 2>/dev/null; then cerrada=1; fi
+    [ -n "$cerrada" ] && decir "Cerré la ventana del panel."
     rm -f "$ARCHIVO_NAV"
   fi
   if panel_vivo; then

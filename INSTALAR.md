@@ -24,7 +24,7 @@ Hazlas juntas, en un solo mensaje. Si el usuario ya contestó alguna en su mensa
 
 **2. ¿Instalo RTK?** Es un programa de terceros (github.com/rtk-ai/rtk, código abierto) que comprime la salida de los comandos para gastar menos tokens. Se instala con un script que se descarga de internet y se ejecuta en su máquina, así que **necesitas su "sí" explícito**. Si no contesta o dice que no, sáltate el paso 5b.
 
-**3. ¿Modo ligero?** (recomendado) Apaga casi todos los plugins para que no ocupen contexto en cada mensaje (medido: de ~10,700 a ~700 tokens fijos) y deja que la araña, un programa local sin IA, le pase a Claude solo las skills que encajan con cada mensaje. Contras que debes decirle: la araña elige por palabras y a veces no atina; y los plugins apagados pierden sus agentes y servidores MCP hasta que se prenden en un proyecto. Se revierte con un comando.
+**3. ¿Modo ligero?** (opcional; **por defecto se queda en modo completo**: si el usuario no lo pide de forma explícita, no lo actives) Apaga casi todos los plugins para que no ocupen contexto en cada mensaje (medido: de ~10,700 a ~700 tokens fijos) y deja que la araña, un programa local sin IA, le pase a Claude solo las skills que encajan con cada mensaje. Contras que debes decirle: la araña elige por palabras y a veces no atina; y los plugins apagados pierden sus agentes y servidores MCP hasta que se prenden en un proyecto. Se revierte con un comando.
 
 **4. ¿Copias locales de documentación?** Si quiere tener la documentación (Solana, Jupiter, Cloudflare, Roblox, Godot…) descargada para consultarla sin internet. Si dice que sí, en el paso 5d le preguntas en qué unidad.
 
@@ -149,7 +149,7 @@ node "$ARANA" indice | tail -3
 node "$ARANA" modo estado
 ```
 
-- Si el usuario dijo **sí al modo ligero**: corre `node "$ARANA" modo ligero` y luego `node "$ARANA" modo estado`; reporta los tokens fijos de antes y después. Hazlo **al final**, cuando ya esté instalado todo lo demás.
+- **Por defecto, modo completo**: no cambies nada. Solo si el usuario dijo **sí al modo ligero** de forma explícita: corre `node "$ARANA" modo ligero` y luego `node "$ARANA" modo estado`; reporta los tokens fijos de antes y después. Hazlo **al final**, cuando ya esté instalado todo lo demás.
 - Si dijo que no, déjalo en modo completo. Puede cambiar cuando quiera con `arana modo ligero` o `arana modo completo`.
 - Si `node` no existe o es menor a la versión 20, no hay araña ni panel: dilo y sigue (lo demás funciona igual).
 

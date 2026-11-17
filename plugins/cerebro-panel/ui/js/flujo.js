@@ -34,6 +34,7 @@ function ultimo() { return pasos[pasos.length - 1]; }
 // ---------- eventos ----------
 en('reinicio', () => { pasos = []; porId.clear(); agentes.clear(); historial = []; finTurno = null; sucio = true; pintar(); });
 en('prompt', (ev) => {
+  if (ev.enCola) { pasos.push(nuevoPaso('prompt', 'tú', ev.texto || '')); pintar(); return; }
   if (finTurno && estado.turno > 1) historial.push(`turno ${estado.turno - 1} · ${finTurno.pasos} pasos · ${duracion(finTurno.ms)}`);
   if (historial.length > 3) historial.shift();
   pasos = [nuevoPaso('prompt', 'tú', ev.texto || '')]; porId.clear(); agentes.clear(); finTurno = null;
@@ -75,6 +76,9 @@ en('herramienta', (ev) => {
 });
 en('subagente', (ev) => {
   if (ev.fase === 'inicio') {
+    // un subagente que ya tenía bloque y vuelve a trabajar (lo reanudaron): se reusa su bloque
+    const ya = agentes.get(ev.id);
+    if (ya) { ya.fin = null; if (ya.paso.propio) ya.paso.estado = 'curso'; pintar(); return; }
     // si la herramienta Task/Agent ya abrió un bloque AGENTE en curso sin dueño, se usa ese
     let p = pasos.find((x) => x.clase === 'agente' && x.estado === 'curso' && !x.agenteId);
     if (!p) { p = nuevoPaso('agente', ev.tipoAgente || 'agente', ev.descripcion || '', { estado: 'curso' }); pasos.push(p); }

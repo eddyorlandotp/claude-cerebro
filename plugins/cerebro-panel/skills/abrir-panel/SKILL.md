@@ -31,8 +31,8 @@ Argumentos que escribió el usuario: `$ARGUMENTS` (pueden venir vacíos; si incl
 ## Qué hace el script
 
 - Arranca el servidor en segundo plano solo si no está corriendo (guarda el pid en `~/.local/state/cerebro-panel/servidor.pid` y comprueba `/salud`).
-- Busca un navegador en este orden: chromium, brave, google-chrome, firefox. Con los de Chromium abre en modo aplicación (`--app=http://127.0.0.1:4317`) con un perfil propio, para poder cerrar esa ventana sin tocar el navegador del usuario; con Firefox usa `--kiosk`.
-- **Hyprland** (verificar en la máquina: aquí no se pudo probar): busca la ventana con `hyprctl -j clients`, la mueve con `hyprctl dispatch 'hl.dsp.window.move({ window = "address:0x…", monitor = "NOMBRE" })'` y la pone a pantalla completa con `hyprctl dispatch 'hl.dsp.window.fullscreen({ window = "address:0x…", action = "set", mode = "fullscreen" })'`. Esa es la sintaxis Lua de Hyprland 0.55 en adelante; si no responde `ok`, el script reintenta con la clásica (`focuswindow address:…`, `movewindow mon:NOMBRE`, `fullscreen 0 set`).
+- Busca un navegador en este orden: chromium, brave, google-chrome, firefox; si no hay ninguno en el PATH, Chromium, Brave o Chrome de flatpak. Con los de Chromium abre en modo aplicación (`--app=http://127.0.0.1:4317`) con un perfil propio, para poder cerrar esa ventana sin tocar el navegador del usuario; con Firefox usa `--kiosk`.
+- **Hyprland** (comprobado en Hyprland 0.57.1): busca la ventana con `hyprctl -j clients`, la mueve con `hyprctl dispatch 'hl.dsp.window.move({ window = "address:0x…", monitor = "NOMBRE" })'` y la pone a pantalla completa con `hyprctl dispatch 'hl.dsp.window.fullscreen({ window = "address:0x…", action = "set", mode = "fullscreen" })'`. Esa es la sintaxis Lua de Hyprland 0.55 en adelante; si no responde `ok`, el script reintenta con la clásica (`focuswindow address:…`, `movewindow mon:NOMBRE`, `fullscreen 0 set`).
 - En X11 pasa `--window-position` con la esquina del monitor elegido y `--start-fullscreen`. En otros escritorios Wayland (GNOME, KDE) la ventana abre donde decida el escritorio.
 
 ## Si algo sale mal

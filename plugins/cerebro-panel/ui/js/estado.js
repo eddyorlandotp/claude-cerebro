@@ -62,6 +62,7 @@ export function recibir(ev) {
       break;
     }
     case 'prompt': {
+      if (ev.enCola) break;      // mensaje mandado a media tarea: sigue el mismo turno
       estado.turno += 1; estado.enTurno = true;
       estado.inicioTurno = reloj.t - (estado.modo === 'vivo' ? Math.min(6 * 3600e3, Math.max(0, Date.now() - ev.ts)) : 0);
       estado.pasos = 0; estado.sugeridas = []; estado.usadas = new Set();

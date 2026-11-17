@@ -32,7 +32,7 @@ function pintarTurno() {
 
 en('sesion', pintarSesion);
 en('biblioteca', (ev) => { modoBib = ev.modo === 'ligero' || ev.modo === 'completo' ? ev.modo : ''; pintarSesion(); });
-en('prompt', () => { duracionFinal = null; limpiarAvisos(); pintarTurno(); });
+en('prompt', (ev) => { if (ev.enCola) return; duracionFinal = null; limpiarAvisos(); pintarTurno(); });
 en('fin_turno', (ev) => { duracionFinal = ev.ms ?? reloj.t - estado.inicioTurno; pintarTurno(); });
 en('reinicio', () => { duracionFinal = null; pintarSesion(); });
 en('conexion', (ok) => { banda(!ok); });

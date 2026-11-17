@@ -47,6 +47,7 @@ export class Estado {
         this.uso = e;
         return e;
       case 'prompt':
+        if (e.enCola) break; // mensaje mandado a media tarea: mismo turno
         this.turno = { numero: this.turno.numero + 1, abierto: true, inicio: e.ts ?? null, pasos: 0, ms: null };
         this.eventosTurno = [];
         this.sugeridas = null;

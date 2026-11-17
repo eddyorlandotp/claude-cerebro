@@ -62,4 +62,4 @@ Medido en una instalación de prueba con 47 plugins: **10,752 tokens fijos por s
 node --test
 ```
 
-Los transcripts de prueba son sintéticos (`servidor/generar-fixtures.mjs`). Contrato técnico en `docs/CONTRATO.md`, diseño en `docs/DISENO.md`.
+Los transcripts de prueba son inventados: `servidor/generar-fixtures.mjs` (los primeros) y `servidor/generar-fixture-real.mjs` (misma forma que los transcripts reales de Claude Code 2.1.32x, con texto inventado). Contrato técnico en `docs/CONTRATO.md`, diseño en `docs/DISENO.md`.

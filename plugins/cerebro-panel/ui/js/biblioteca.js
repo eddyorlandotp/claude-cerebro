@@ -135,7 +135,7 @@ en('reinicio', () => {
   if (modo !== 'pasear') { modo = 'pasear'; arana.modo = 'andar'; arana.prisa = 0.12; destino = null; pausa = 0; }
   nube.marcarUsadas(new Set());
 });
-en('prompt', () => { etiquetas.clear(); hilosUsadas.clear(); nube.marcarUsadas(new Set()); layoutEtiquetas(); });
+en('prompt', (ev) => { if (ev.enCola) return; etiquetas.clear(); hilosUsadas.clear(); nube.marcarUsadas(new Set()); layoutEtiquetas(); });
 en('sugeridas', () => {
   const ids = estado.sugeridas.map((s) => s.id);
   const conocidas = ids.filter((id) => nube.posSkill(id));
